@@ -1,0 +1,83 @@
+# Overrides para as 7 familias em que o mapa oficial (Anexo I/VII) diverge da
+# leitura tecnica do texto dos anexos da LC 214/2025. Aplicados somente quando
+# politica.divergencias == alinhada_gabarito.
+#
+# Cada override registra a classe do mapa e a classe da leitura tecnica, com
+# justificativa e status "divergente do mapa". A trilha de auditoria guarda as
+# duas leituras; o painel mostra o custo em R$ de cada uma.
+#
+# P9: `referencia_legal` aponta o anexo da LC 214/2025. O numero de artigo deve
+# ser confirmado com a organizacao antes do evento (nao inventamos artigo).
+#
+# Fonte: PROPOSTA-SOLUCAO-VENCEDORA.md secao 2 (tabela das 7 familias) e
+# caralhoo.md secao 1.1.
+overrides:
+  - ncm: "04012000"
+    familia: CREME_LEITE
+    descricao: "Creme de leite"
+    classe_mapa: "200003"
+    classe: "200034"
+    itens: 153
+    justificativa: "Creme de leite nao consta da cesta basica do Anexo I; e alimento para consumo humano do Anexo VII (reducao 60%)."
+    referencia_legal: "LC 214/2025, Anexo VII (alimentos para consumo humano)"
+    status: "divergente do mapa"
+
+  - ncm: "04061000"
+    familia: QUEIJO_MINA
+    descricao: "Queijo minas frescal"
+    classe_mapa: "200003"
+    classe: "200034"
+    itens: 153
+    justificativa: "Queijos do codigo 0406 nao integram a cesta basica do Anexo I; sao alimentos do Anexo VII."
+    referencia_legal: "LC 214/2025, Anexo VII (alimentos para consumo humano)"
+    status: "divergente do mapa"
+
+  - ncm: "04069000"
+    familia: QUEIJO_OUTROS
+    descricao: "Queijos mozzarella/prato e requeijao"
+    classe_mapa: "200003"
+    classe: "200034"
+    itens: 466
+    justificativa: "Queijos do codigo 0406 nao integram a cesta basica do Anexo I; sao alimentos do Anexo VII."
+    referencia_legal: "LC 214/2025, Anexo VII (alimentos para consumo humano)"
+    status: "divergente do mapa"
+
+  - ncm: "07134000"
+    familia: LENTILHA
+    descricao: "Lentilha"
+    classe_mapa: "200034"
+    classe: "200003"
+    itens: 168
+    justificativa: "Leguminosas secas (lentilha) integram a cesta basica do Anexo I (reducao 100%), nao o Anexo VII."
+    referencia_legal: "LC 214/2025, Anexo I (cesta basica nacional de alimentos)"
+    status: "divergente do mapa"
+
+  - ncm: "15121100"
+    familia: OLEO_SOJA
+    descricao: "Oleo de soja refinado"
+    classe_mapa: "200034"
+    classe: "200003"
+    itens: 307
+    justificativa: "Oleo de soja integra a cesta basica do Anexo I (reducao 100%), nao o Anexo VII."
+    referencia_legal: "LC 214/2025, Anexo I (cesta basica nacional de alimentos)"
+    status: "divergente do mapa"
+
+  - ncm: "11081200"
+    familia: AMIDO_MILHO
+    descricao: "Amido de milho"
+    classe_mapa: "200034"
+    classe: "000001"
+    itens: 197
+    justificativa: "Feculas/amidos nao constam dos Anexos I ou VII; regime padrao."
+    referencia_legal: "LC 214/2025, Anexos I e VII (nao listado -> regime padrao)"
+    status: "divergente do mapa"
+
+  - ncm: "11022000"
+    familia: FUBA
+    descricao: "Fuba de milho"
+    classe_mapa: "200003"
+    classe: "000001"
+    itens: 190
+    justificativa: "Farinha de milho (fuba) nao consta do rol taxativo da cesta basica do Anexo I; regime padrao."
+    referencia_legal: "LC 214/2025, Anexo I (rol taxativo; nao listado -> regime padrao)"
+    status: "divergente do mapa"

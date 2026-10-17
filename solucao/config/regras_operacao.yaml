@@ -1,0 +1,22 @@
+# Regras de operacao (valem antes do produto). Fonte: enunciado secao 4.1.
+regras:
+  - id: OP-01
+    quando: "CFOP == 5910"
+    descricao: "Bonificacao constante do proprio documento, sem evento posterior"
+    cClassTrib: "410001"
+    confianca: 0.98
+    fonte: "enunciado secao 4.1 (regra de operacao)"
+
+  - id: OP-02
+    quando: "CFOP == 7102 or destinatario.tipo_cliente == exterior"
+    descricao: "Exportacao de bens (destinatario no exterior)"
+    cClassTrib: "410004"
+    confianca: 0.98
+    fonte: "enunciado secao 4.1 (regra de operacao)"
+
+  - id: OP-03
+    quando: "familia == DISPOSITIVO_MEDICO and destinatario.tipo_cliente == orgao_publico"
+    descricao: "Dispositivo medico do Anexo IV vendido a orgao publico"
+    cClassTrib: "200005"
+    confianca: 0.98
+    fonte: "enunciado secao 4.1 (regra de operacao)"

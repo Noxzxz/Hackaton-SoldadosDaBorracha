@@ -1,0 +1,26 @@
+# Condicoes do mapa (coluna `condicao`) mapeadas para predicados.
+# Para um atacadista de alimentos, a condicao "destinados a alimentacao humana"
+# e verdadeira; condicoes de insumo agropecuario / uso veterinario sao falsas.
+# Fonte: mapa_ncm_cclasstrib.csv (valores distintos) + enunciado secao 4.2.
+condicoes:
+  "DESTINADOS À ALIMENTAÇÃO HUMANA":
+    satisfaz: true
+    motivo: "Atacadista de alimentos: destinacao humana presumida."
+  "ALIMENTOS DESTINADOS AO CONSUMO HUMANO":
+    satisfaz: true
+    motivo: "Atacadista de alimentos."
+  "PRODUTOS HORTÍCOLAS, FRUTAS E OVOS":
+    satisfaz: true
+    motivo: "Familia HORTIFRUTI."
+  "DISPOSITIVOS MÉDICOS":
+    satisfaz: true
+    motivo: "Somente para familias de dispositivos medicos."
+  "INSUMOS AGROPECUÁRIOS E AQUÍCOLAS":
+    satisfaz: false
+    motivo: "A Meridional nao comercializa insumos agropecuarios."
+  "INSUMOS AGROPECUÁRIOS E AQUÍCOLAS - USO VETERINÁRIO":
+    satisfaz: false
+    motivo: "Uso veterinario."
+  _default:
+    satisfaz: false
+    motivo: "Condicao nao reconhecida: precedencia cai para 000001."

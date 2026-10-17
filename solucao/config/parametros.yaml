@@ -1,0 +1,80 @@
+# Premissas do case (copia de pacote-times/dados/parametros.json).
+# O pacote oficial novo corrigiu o CNPJ da empresa foco para 51238476000104,
+# que e o mesmo valor do cadastro e das chaves das DANFEs.
+versao: "1.0"
+observacao: >-
+  Premissas editaveis. As aliquotas de referencia de 2027 e 2033 ainda nao foram
+  fixadas pelo Senado: os valores abaixo sao estimativas.
+
+empresa_foco:
+  cnpj: "51238476000104"
+  regime_hoje: "lucro real (PIS/Cofins nao cumulativos)"
+
+aliquota_referencia:
+  cbs_pct: 8.8
+  ibs_pct: 17.7
+  total_pct: 26.5
+  origem: "premissa: estimativa do governo (2024); estimativas mais recentes chegam a ~28%"
+
+pis_cofins_hoje:
+  pis_pct: 1.65
+  cofins_pct: 7.6
+  base: "valor do produto menos o ICMS do item"
+  regra: >-
+    tributado: base x 1,65% (PIS) e base x 7,6% (Cofins); aliquota_zero,
+    monofasico e exportacao (CFOP 7xxx): zero
+  origem: "lucro real, regime nao cumulativo; ICMS fora da base desde o STF (Tema 69)"
+
+cenarios:
+  hoje:
+    descricao: "ICMS como destacado na DANFE; PIS e Cofins pela regra de pis_cofins_hoje"
+    icms: "como destacado na DANFE"
+    pis_cofins: "regra de pis_cofins_hoje"
+  "2027":
+    descricao: "CBS plena; PIS e Cofins extintos; IPI zerado; ICMS mantido"
+    icms: "como destacado na DANFE"
+    pis_cofins: "extintos"
+    cbs_pct: 8.7
+    ibs_uf_pct: 0.05
+    ibs_mun_pct: 0.05
+    origem: "LC 214 art. 344 (IBS 0,05% + 0,05%) e CBS = referencia menos 0,1 ponto percentual"
+  "2033":
+    descricao: "regime novo completo; ICMS e ISS extintos"
+    icms: "extinto"
+    pis_cofins: "extintos"
+    cbs_pct: 8.8
+    ibs_pct: 17.7
+
+teste_2026:
+  cbs_pct: 0.9
+  ibs_uf_pct: 0.1
+  ibs_mun_pct: 0.0
+  observacao: "ano de teste, valores so informativos; nao entra na simulacao"
+
+transicao_icms_bonus:
+  observacao: "fracao do ICMS mantida em cada ano"
+  "2029": 0.9
+  "2030": 0.8
+  "2031": 0.7
+  "2032": 0.6
+  "2033": 0.0
+
+reducao_pct_por_cclasstrib:
+  "000001": 0
+  "200003": 100
+  "200014": 100
+  "200034": 60
+  "200030": 60
+  "200005": 100
+  "410001": "sem incidencia"
+  "410004": "sem incidencia"
+
+# Ressalva do enunciado oficial novo (secao 3): nas exportacoes o ICMS nao
+# incide (imunidade) e algumas DANFEs destacam ICMS por erro de geracao.
+# Decisao do case (2026-10-17): tratar o ICMS impresso como erro de emissao e
+# considerar zero em CFOP 7xxx (icms_zero: true).
+# O template oficial mostra 43,43 no item de exportacao; se for necessario
+# reproduzir o template, troque para false.
+tratamento_exportacao:
+  icms_zero: true
+

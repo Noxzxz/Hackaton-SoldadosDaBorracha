@@ -1,0 +1,11 @@
+# caches e artefatos de execucao
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+out/
+logs/
+
+# artefatos de processo (P27)
+FIM.flag
+PROGRESSO.md

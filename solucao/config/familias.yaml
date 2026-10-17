@@ -1,0 +1,129 @@
+# Familias de produto: ligam NCM + palavras-chave da descricao a um conjunto de
+# classes CCD (candidatos do mapa) e ao comportamento de guarda.
+#
+# O catalogo (128 descricoes) usa estas familias para desempatar o mapa quando
+# ele e ambiguo e para rejeitar aparencias enganosas de prefixo (guarda).
+# Fonte principal: caralhoo.md secao 3A (guarda de prefixo) e enunciado secao 4.
+familias:
+  HORTIFRUTI:
+    descricao: "Horticolas, frutas e ovos (Anexo XV, reducao 100%)"
+    anexo: XV
+    classes_preferidas: ["200014"]
+    ncm: ["07019000","07020000","07031000","07041000","07051100","07061000",
+          "07070000","07096000","07099300","08039000","08045020","08051000",
+          "08061000","08081000"]
+    palavras_chave: ["BATATA","TOMATE","CEBOLA","COUVE","ALFACE","CENOURA",
+                     "PEPINO","PIMENTAO","ABOBRINHA","BANANA","MANGA","LARANJA",
+                     "UVA","MACA"]
+
+  CESTA_BASICA:
+    descricao: "Cesta Basica Nacional de Alimentos (Anexo I, reducao 100%)"
+    anexo: I
+    classes_preferidas: ["200003"]
+    ncm: ["04012010","04051000","07133319","09011110","10063021","11010010",
+          "11062000","17011400","19021900","25010020"]
+    palavras_chave: ["ARROZ","FEIJAO","CAFE","ACUCAR","SAL","MACARRAO","LEITE UHT",
+                     "MANTEIGA","FARINHA DE TRIGO","FARINHA DE MANDIOCA","PAO FRANCES"]
+
+  ANEXO_VII:
+    descricao: "Alimentos para consumo humano (Anexo VII, reducao 60%)"
+    anexo: VII
+    classes_preferidas: ["200034"]
+    ncm: ["04032000","19059010"]
+    palavras_chave: ["IOGURTE","PAO DE FORMA"]
+
+  DISPOSITIVO_MEDICO:
+    descricao: "Dispositivos medicos (Anexo IV)"
+    anexo: IV
+    classes_preferidas: ["200030"]
+    ncm: ["30059090","40151100","40151900","90183100","90183900","90183929"]
+    palavras_chave: ["CURATIVO","LUVA","SERINGA","AGULHA","CATETER","EQUIPO",
+                     "INTRODUTOR"]
+
+  LIMPEZA_HIGIENE:
+    descricao: "Higiene/limpeza comum: regime padrao (trap do Anexo VIII)"
+    anexo:
+    classes_preferidas: ["000001"]
+    ncm: ["34011900","34022000","34091000","38089411","48184000"]
+    palavras_chave: ["SABAO","DETERGENTE","LIMPADOR","AMACIANTE","DESINFETANTE",
+                     "PAPEL HIGIENICO"]
+
+  REGIME_PADRAO:
+    descricao: "Itens comuns fora dos anexos: regime padrao"
+    anexo:
+    classes_preferidas: ["000001"]
+    ncm: ["22011000","22021000","19053100","20099100"]
+    palavras_chave: ["AGUA MINERAL","REFRIGERANTE","REFRIG"]
+    descricao_pobre: false
+
+  REFRIGERANTE:
+    descricao: "Refrigerantes (NCM 2202.10.00): regime padrao + Imposto Seletivo"
+    anexo:
+    classes_preferidas: ["000001"]
+    ncm: ["22021000"]
+    palavras_chave: ["REFRIG"]
+    imposto_seletivo: true
+
+  DESCRICAO_POBRE:
+    descricao: "Descricao pobre resolvida pelo CNAE do emitente (camada 4)"
+    anexo:
+    classes_preferidas: ["000001"]
+    ncm: ["39269090","39232100","39241000"]
+    palavras_chave: ["DIVERSOS","EMBALAGEM","MATERIAL CONF","MATERIAL DIVERSO",
+                     "SACO PLASTICO","COPO DESCARTAVEL"]
+    cnae_esperado: ["2229-3/99"]
+
+  # --------------------------------------------------------------------- #
+  # Familias divergentes mapa x leitura tecnica (config/overrides_divergencia.yaml).
+  # `classes_preferidas` guarda a classe que o MAPA oficial indica (leitura
+  # estrita); o override muda a classe ativa sob a politica alinhada_gabarito.
+  # --------------------------------------------------------------------- #
+  CREME_LEITE:
+    descricao: "Creme de leite (NCM 0401.20.00) - divergente mapa/gabarito"
+    anexo: VII
+    classes_preferidas: ["200003"]
+    ncm: ["04012000"]
+    palavras_chave: ["CREME DE LEITE"]
+
+  QUEIJO_MINA:
+    descricao: "Queijo minas frescal (NCM 0406.10.00) - divergente mapa/gabarito"
+    anexo: VII
+    classes_preferidas: ["200003"]
+    ncm: ["04061000"]
+    palavras_chave: ["QUEIJO MINAS"]
+
+  QUEIJO_OUTROS:
+    descricao: "Queijos 0406.90.00 (mozzarella/prato/requeijao) - divergente"
+    anexo: VII
+    classes_preferidas: ["200003"]
+    ncm: ["04069000"]
+    palavras_chave: ["QUEIJO PRATO","QUEIJO MOZZARELLA","REQUEIJAO"]
+
+  LENTILHA:
+    descricao: "Lentilha (NCM 0713.40.00) - divergente mapa/gabarito"
+    anexo: I
+    classes_preferidas: ["200034"]
+    ncm: ["07134000"]
+    palavras_chave: ["LENTILHA"]
+
+  OLEO_SOJA:
+    descricao: "Oleo de soja (NCM 1512.11.00) - divergente mapa/gabarito"
+    anexo: I
+    classes_preferidas: ["200034"]
+    ncm: ["15121100"]
+    palavras_chave: ["OLEO DE SOJA"]
+
+  AMIDO_MILHO:
+    descricao: "Amido de milho (NCM 1108.12.00) - divergente mapa/gabarito"
+    anexo: VII
+    classes_preferidas: ["200034"]
+    ncm: ["11081200"]
+    palavras_chave: ["AMIDO DE MILHO"]
+
+  FUBA:
+    descricao: "Fuba de milho (NCM 1102.20.00) - divergente mapa/gabarito"
+    anexo: I
+    classes_preferidas: ["200003"]
+    ncm: ["11022000"]
+    palavras_chave: ["FUBA"]
+

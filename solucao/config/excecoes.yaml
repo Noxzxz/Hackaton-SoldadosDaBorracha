@@ -1,0 +1,10 @@
+# Excecoes do mapa (coluna `excecao`) e regra de precedencia entre anexos.
+# Fonte: mapa_ncm_cclasstrib.csv + enunciado secao 4.2.
+excecoes:
+  "Produtos relacionados no Anexo I":
+    remove_classe: "200034"
+    quando_existe: "200003"
+    motivo: "Precedencia do Anexo I (cesta basica) sobre o Anexo VII."
+  _default:
+    remove_classe: null
+    motivo: "Excecao nao reconhecida: nao altera a decisao."

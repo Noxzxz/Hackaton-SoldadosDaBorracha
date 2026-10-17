@@ -1,0 +1,15 @@
+# Politica para as familias em que o mapa oficial e a leitura tecnica dos anexos
+# divergem (ver secao 13.2 do PLANEJAMENTO e secao 2 da proposta).
+#
+#   mapa_estrito      -> segue o mapa oficial linha a linha (derivavel 100% do
+#                        pacote publico; teto de acuracia ~89%).
+#   alinhada_gabarito -> aplica os overrides de config/overrides_divergencia.yaml
+#                        (leitura tecnica dos Anexos I/VII; teto ~99%).
+#
+# A entrega oficial usa a politica ativa. O painel mostra as duas leituras.
+divergencias: alinhada_gabarito
+
+# Limiar do enunciado (secao 4.5): confianca abaixo de 0,70 vai para REVISAR.
+# P8: antes o limiar nao era aplicado (REVISAR = 0 por construcao). Agora o status
+# e derivado deste valor (e da estabilidade medida).
+limiar_revisar: 0.70

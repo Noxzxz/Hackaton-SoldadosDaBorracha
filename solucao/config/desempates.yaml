@@ -1,0 +1,12 @@
+# Desempates de NCM compartilhado por produtos diferentes (P11).
+# Antes esse caso vivia hardcoded em src/classificar.py; agora e configuracao.
+#
+# Regra `descricao_contem`: se o valor aparece na descricao normalizada, usa
+# `familia`; caso contrario, `familia_alternativa`.
+desempates:
+  - ncm: "19059090"
+    regra: "descricao_contem"
+    valor: "PAO FRANCES"
+    familia: "CESTA_BASICA"
+    familia_alternativa: "REGIME_PADRAO"
+    descricao: "Pao frances (cesta basica) x bolo (regime padrao) no mesmo NCM"

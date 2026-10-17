@@ -1,0 +1,123 @@
+{
+  "cenarios": [
+    "hoje",
+    "2027",
+    "2033"
+  ],
+  "itens": [
+    {
+      "chave": "35260527164983000158550010000122991549952670",
+      "nItem": 8,
+      "perspectiva": "compra",
+      "cClassTrib": "200003",
+      "vProd": 2401.74,
+      "hoje": {
+        "imposto": 168.13,
+        "aliquota_efetiva_pct": 7.0,
+        "credito": 168.13
+      },
+      "2027": {
+        "imposto": 168.13,
+        "aliquota_efetiva_pct": 7.0,
+        "credito": 168.13
+      },
+      "2033": {
+        "imposto": 0.0,
+        "aliquota_efetiva_pct": 0.0,
+        "credito": 0.0
+      }
+    },
+    {
+      "chave": "35260524816357000100550010000237271529658852",
+      "nItem": 1,
+      "perspectiva": "compra",
+      "cClassTrib": "000001",
+      "vProd": 303690.0,
+      "hoje": {
+        "imposto": 77699.09,
+        "aliquota_efetiva_pct": 25.59,
+        "credito": 0.0
+      },
+      "2027": {
+        "imposto": 81388.92,
+        "aliquota_efetiva_pct": 26.8,
+        "credito": 26724.72
+      },
+      "2033": {
+        "imposto": 80477.85,
+        "aliquota_efetiva_pct": 26.5,
+        "credito": 80477.85
+      }
+    },
+    {
+      "chave": "35260551238476000104550010000337901795680790",
+      "nItem": 1,
+      "perspectiva": "venda",
+      "cClassTrib": "410004",
+      "vProd": 620.4,
+      "hoje": {
+        "imposto": 43.43,
+        "aliquota_efetiva_pct": 7.0,
+        "credito": null
+      },
+      "2027": {
+        "imposto": 43.43,
+        "aliquota_efetiva_pct": 7.0,
+        "credito": null
+      },
+      "2033": {
+        "imposto": 0.0,
+        "aliquota_efetiva_pct": 0.0,
+        "credito": null
+      }
+    },
+    {
+      "chave": "35260551238476000104550010000337401537769109",
+      "nItem": 1,
+      "perspectiva": "venda",
+      "cClassTrib": "200005",
+      "vProd": 23947.28,
+      "hoje": {
+        "imposto": 0.0,
+        "aliquota_efetiva_pct": 0.0,
+        "credito": null
+      },
+      "2027": {
+        "imposto": 0.0,
+        "aliquota_efetiva_pct": 0.0,
+        "credito": null
+      },
+      "2033": {
+        "imposto": 0.0,
+        "aliquota_efetiva_pct": 0.0,
+        "credito": null
+      }
+    }
+  ],
+  "resumo": [
+    {
+      "cenario": "hoje",
+      "debitos_vendas": 43.43,
+      "creditos_compras": 168.13,
+      "imposto_liquido": -124.7,
+      "variacao_vs_hoje": 0.0,
+      "variacao_vs_hoje_pct": 0.0
+    },
+    {
+      "cenario": "2027",
+      "debitos_vendas": 43.43,
+      "creditos_compras": 26892.85,
+      "imposto_liquido": -26849.42,
+      "variacao_vs_hoje": -26724.72,
+      "variacao_vs_hoje_pct": -21431.21
+    },
+    {
+      "cenario": "2033",
+      "debitos_vendas": 0.0,
+      "creditos_compras": 80477.85,
+      "imposto_liquido": -80477.85,
+      "variacao_vs_hoje": -80353.15,
+      "variacao_vs_hoje_pct": -64437.17
+    }
+  ]
+}
