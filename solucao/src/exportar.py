@@ -142,6 +142,13 @@ def exportar_tudo(salvar_painel: bool = True, usar_llm: bool = True) -> dict:
         except Exception as e:  # noqa: BLE001
             print("aviso: tribunal falhou:", e)
 
+        try:
+            from .transicao import calcular_transicao, salvar as salvar_transicao
+
+            salvar_transicao(calcular_transicao(itens, resumo))
+        except Exception as e:  # noqa: BLE001
+            print("aviso: transicao falhou:", e)
+
     return {
         "n_itens": len(simulados),
         "resumo": resumo,

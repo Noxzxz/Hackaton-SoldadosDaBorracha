@@ -193,8 +193,6 @@ def resolver_fila(catalogo, cliente: Optional[LlmCliente] = None, top5_fn=None) 
 
     Devolve (catalogo_atualizado, ResultadoFila).
     """
-    import pandas as pd
-
     from .classificar import limiar_revisar
 
     top5_fn = top5_fn or busca_top5

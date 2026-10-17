@@ -48,6 +48,14 @@ def carregar():
         dados["tribunal"] = json.loads((OUT_DIR / "tribunal.json").read_text(encoding="utf-8"))
     if (OUT_DIR / "equilibrio.parquet").exists():
         dados["equilibrio"] = pd.read_parquet(OUT_DIR / "equilibrio.parquet")
+    if (OUT_DIR / "auditoria_ambiguos.csv").exists():
+        dados["auditoria"] = pd.read_csv(
+            OUT_DIR / "auditoria_ambiguos.csv", sep=";", encoding="utf-8-sig"
+        )
+    if (OUT_DIR / "uso_tokens.json").exists():
+        dados["uso_llm"] = json.loads((OUT_DIR / "uso_tokens.json").read_text(encoding="utf-8"))
+    if (OUT_DIR / "transicao_2029_2032.parquet").exists():
+        dados["transicao"] = pd.read_parquet(OUT_DIR / "transicao_2029_2032.parquet")
     dados["notas"] = pd.read_parquet(OUT_DIR / "notas.parquet")
     dados["cadastro"] = carregar_cadastro()
     return dados
@@ -93,7 +101,7 @@ c3.metric("Imposto Seletivo (itens)", int((itens["imposto_seletivo"] == "sim").s
 conf_min = itens["confianca"].min()
 c4.metric("Confianca minima", f"{conf_min:.2f}")
 
-aba = st.tabs(["Veredito", "Onde ganha/perde", "Drill-down", "Tribunal", "Qualidade", "Simulador e se?"])
+aba = st.tabs(["Veredito", "Onde ganha/perde", "Drill-down", "Tribunal", "Qualidade", "Simulador e se?", "Auditoria LLM"])
 
 # ---------------- Veredito ----------------
 with aba[0]:
@@ -106,10 +114,12 @@ with aba[0]:
     st.dataframe(show, width="stretch", hide_index=True)
 
     var_2033 = res.loc[res["cenario"] == "2033", "variacao_vs_hoje"].iloc[0]
-    verbo = "ganha" if var_2033 < 0 else "perde"
     st.info(
-        f"Leitura: com o credito amplo de IBS/CBS nas compras, a Meridional **{verbo}** "
-        f"{brl(abs(var_2033))} em 2033 frente a hoje (imposto liquido negativo = credito acumulado)."
+        f"Diferenca simulada entre politicas: em 2033 o imposto liquido fica "
+        f"{brl(abs(var_2033))} mais negativo que hoje (creditos amplos de IBS/CBS "
+        f"maiores que os debitos simulados). Isso **nao** equivale a lucro, caixa "
+        f"disponivel ou recuperacao financeira - os dados sao sinteticos e as "
+        f"aliquotas de 2027/2033 sao premissas."
     )
     st.caption(
         "Premissas: aliquotas de 2027 e 2033 sao estimativas (nao oficiais), "
@@ -270,6 +280,60 @@ with aba[5]:
         st.caption(
             "Tabela de equilibrio calculada com as premissas base; os sliders "
             "acima nao recalculam esta tabela."
+        )
+
+# ---------------- Auditoria LLM ----------------
+with aba[6]:
+    st.subheader("Juiz LLM - fila de produtos ambiguos")
+    aud = dados.get("auditoria")
+    uso = dados.get("uso_llm", {})
+    if uso:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Modelo", uso.get("modelo", "n/d"))
+        c2.metric("Chamadas (execucao)", uso.get("chamadas", 0))
+        c3.metric(
+            "Tokens (entrada/saida)",
+            f"{uso.get('tokens_entrada', 0)}/{uso.get('tokens_saida', 0)}",
+        )
+    if aud is None:
+        st.warning("Rode `python scripts/rodar_tudo.py` com o juiz LLM para gerar a auditoria.")
+    else:
+        st.caption(
+            "Uma linha por produto com mais de uma classe permitida ou condicao nao "
+            "mapeada. A decisao do juiz so vale se a classe estiver entre os candidatos."
+        )
+        cols = [
+            c
+            for c in [
+                "cProd",
+                "NCM",
+                "xProd_norm",
+                "classe_regra",
+                "candidatos",
+                "classe_llm",
+                "confianca",
+                "metodo",
+                "cache_hit",
+            ]
+            if c in aud.columns
+        ]
+        st.dataframe(aud[cols], width="stretch", hide_index=True)
+        st.write("Detalhe (justificativa e evidencias):")
+        for _, r in aud.iterrows():
+            with st.expander(f"{r.get('cProd')} - {r.get('xProd_norm', '')}"):
+                st.markdown(f"**Candidatos:** {r.get('candidatos', '')}")
+                st.markdown(f"**Eliminados por regra:** {r.get('eliminados', '') or '-'}")
+                st.markdown(f"**Top-5 BM25:** {r.get('top5_bm25', '') or '-'}")
+                st.markdown(f"**Decisao:** {r.get('decisao_final')} ({r.get('metodo')})")
+                st.markdown(f"**Justificativa do juiz:** {r.get('justificativa', '')}")
+
+    tr = dados.get("transicao")
+    if tr is not None and len(tr):
+        st.subheader("Transicao 2029-2032 (bonus)")
+        st.dataframe(tr, width="stretch", hide_index=True)
+        st.caption(
+            "Calculada com as fracoes de ICMS de config/parametros.yaml; "
+            "nao altera o simulacao.json oficial (3 cenarios)."
         )
 
 st.caption("Documento sintetico para hackathon - sem valor fiscal. Fonte: LC 214/2025 (tabelas oficiais) + premissas do case.")

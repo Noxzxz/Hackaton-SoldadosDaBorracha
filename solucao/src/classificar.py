@@ -352,14 +352,34 @@ def classificar_produto(
 
     # Descricao pobre resolvida pelo CNAE do emitente (camada 4)
     if familia == "DESCRICAO_POBRE" or descricao_pobre:
+        esperados = fam_cfg.get("cnae_esperado", []) or []
+        cnae = str(cnae_emitente or "").strip()
+        if cnae and esperados and cnae not in esperados:
+            # CNAE divergente do esperado: nao presume regime padrao
+            return Decisao(
+                cClassTrib="000001",
+                status="REVISAR",
+                confianca=0.55,
+                fonte=(
+                    f"CNAE {cnae} divergente do esperado {esperados}; "
+                    f"descricao pobre '{xprod_norm}' -> REVISAR"
+                ),
+                familia="DESCRICAO_POBRE",
+                regra="CAMADA_4_CNAE_DIVERGENTE",
+                imposto_seletivo=is_flag,
+                classe_mapa="000001",
+                tipo_match="cnae",
+            )
+        adere = "aderente" if cnae in esperados else "nao verificavel"
+        conf_cnae = 0.80 if cnae in esperados else 0.75
         fonte = (
-            f"CNAE {cnae_emitente or 'n/d'} (plasticos/embalagens) do emitente; "
+            f"CNAE {cnae or 'n/d'} ({adere}) do emitente; "
             f"descricao pobre '{xprod_norm}'"
         )
         return Decisao(
             cClassTrib="000001",
             status="CLASSIFICADO",
-            confianca=0.80,
+            confianca=conf_cnae,
             fonte=fonte,
             familia="DESCRICAO_POBRE",
             regra="CAMADA_4_CNAE",
