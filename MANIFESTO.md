@@ -97,7 +97,7 @@ python ..\pacote-times\templates-entrega\validar_entrega.py .\saida
 Esperado:
 
 - `TUDO OK`
-- `27 passed`
+- `28 passed`
 - `FORMATO OK`
 
 ---

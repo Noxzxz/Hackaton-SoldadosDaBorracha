@@ -88,7 +88,7 @@ identificado. A classificação dos 4 itens é idêntica.
 
 | Verificação | Resultado |
 |---|---|
-| `python -m pytest -q` | **27 passed** |
+| `python -m pytest -q` | **28 passed** |
 | `python scripts/validar_entrega.py` | **TUDO OK** |
 | Validador oficial (`templates-entrega/validar_entrega.py`) | **FORMATO OK** |
 | `ruff check --select F,E9` | **All checks passed** |
@@ -107,8 +107,9 @@ afirmar com os artefatos oficiais:
   estável; 100% dos itens com confiança ≥ 0,70; 0 `REVISAR`.
 - **Simulação:** 3/4 itens do template exatos; o item de exportação segue a
   decisão de ICMS zero.
-- **Exposição:** se a banca usar o ICMS destacado do template como referência, os
-  447 itens de exportação (2,98% dos itens) divergem em hoje/2027; se usar a
+- **Exposição:** se a banca usar o ICMS destacado do template como referência,
+  os **256 itens com ICMS positivo** (1,71% dos 15.000) divergem em hoje/2027;
+  os 447 são exportações no total, das quais 191 já tinham ICMS zero. Se usar a
   regra do enunciado, estão corretos.
 
 ---

@@ -116,11 +116,16 @@ def main() -> None:
     # ---------------- metadados / top itens ----------------
     total_vprod = sum(_d(x) for x in exp["vProd"])
     total_icms = sum(_d(x) for x in exp["vICMS"])
+    # "afetado" = item/nota com ICMS destacado positivo; os demais ja eram zero.
+    itens_afetados = int((exp["vICMS"].map(_d) > 0).sum())
+    notas_afetadas = int(exp.loc[exp["vICMS"].map(_d) > 0, "chave"].nunique())
     top = itens_df.head(10).copy()
     payload = {
         "descricao": "Baseline ICMS de exportacao: valor destacado (errado) x zero (correto)",
         "itens_exportacao": int(len(exp)),
+        "itens_afetados": itens_afetados,
         "notas_exportacao": int(exp["chave"].nunique()),
+        "notas_afetadas": notas_afetadas,
         "vProd_total": f"{total_vprod:.2f}",
         "icms_destacado_total": f"{total_icms:.2f}",
         "aliquota_icms_efetiva_pct": f"{(total_icms / total_vprod * 100):.2f}" if total_vprod else "0.00",
@@ -134,11 +139,12 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    print("=== BASELINE EXPORTACAO (447 itens) ===")
+    print(f"=== BASELINE EXPORTACAO ({len(exp)} itens) ===")
     print(resumo.to_string(index=False))
     print(f"\nvProd exportacoes: {total_vprod:.2f}")
     print(f"ICMS destacado total: {total_icms:.2f} ({total_icms / total_vprod * 100:.2f}% do vProd)")
-    print(f"Notas afetadas: {exp['chave'].nunique()}")
+    print(f"Itens de exportacao: {len(exp)} ({itens_afetados} com ICMS > 0)")
+    print(f"Notas de exportacao: {exp['chave'].nunique()} ({notas_afetadas} afetadas)")
     print("\nArquivos:")
     for nome in (
         "baseline_exportacao.csv",

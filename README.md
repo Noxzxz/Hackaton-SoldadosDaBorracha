@@ -4,7 +4,7 @@ Solução completa para a **Atacadista Meridional**: classificação fiscal de 1
 itens, simulação de hoje × 2027 × 2033, painel interativo, trilha de auditoria e
 baseline do ICMS de exportação apurado a maior.
 
-**Status:** pacote oficial novo aplicado, solução retificada, 27 testes verdes,
+**Status:** pacote oficial novo aplicado, solução retificada, 28 testes verdes,
 validador oficial `FORMATO OK`.
 
 ---

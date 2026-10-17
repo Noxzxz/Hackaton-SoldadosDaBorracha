@@ -73,7 +73,8 @@ python scripts/baseline_exportacao.py
 Gera:
 
 - `out/baseline_exportacao.csv` — resumo por cenário.
-- `out/baseline_exportacao_itens.csv` — os 447 itens de exportação.
+- `out/baseline_exportacao_itens.csv` — os 447 itens de exportação (256 com ICMS
+  afetado).
 - `out/baseline_exportacao.json` — resumo + top itens.
 
 Documento para a banca: `BASELINE-ICMS-EXPORTACAO.md`.

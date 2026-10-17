@@ -8,7 +8,7 @@ import pandas as pd
 from src.classificar import construir_catalogo, classificar_itens
 from src.extrair import extrair_tudo
 from src.io_dados import cadastro as carregar_cadastro
-from src.simular import ibs_cbs, pis_cofins_hoje, r2, simular_dataframe, simular_item
+from src.simular import ibs_cbs, pis_cofins_hoje, r2, simular_dataframe, simular_e_se, simular_item
 
 D = Decimal
 
@@ -120,6 +120,28 @@ def test_resumo_identidade_e_variacao():
     assert res[0]["variacao_vs_hoje"] == D("0.00")
     for r in res:
         assert r["imposto_liquido"] == r["debitos_vendas"] - r["creditos_compras"]
+
+
+def test_simulador_e_se_repasse():
+    """O repasse precisa mudar uma saida visivel quando a aliquota muda."""
+    df = pd.DataFrame(
+        {
+            "perspectiva": ["venda", "compra"],
+            "vProd": [100.0, 50.0],
+            "imposto_2027": [10.0, 0.0],
+            "imposto_2033": [20.0, 0.0],
+            "credito_2027": [None, 5.0],
+            "credito_2033": [None, 4.0],
+        }
+    )
+    base = simular_e_se(df, 26.5, 0)
+    assert base["liquido_com_repasse"] == base["liquido_sem_repasse"]
+    assert base["delta_preco"] == 0
+
+    rep = simular_e_se(df, 28.0, 100)
+    assert rep["preco_repasse"] > rep["preco_base"]
+    assert rep["debitos_com_repasse"] > rep["debitos_sem_repasse"]
+    assert rep["liquido_com_repasse"] != rep["liquido_sem_repasse"]
 
 
 def test_coerencia_catalogo_itens():

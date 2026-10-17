@@ -56,7 +56,7 @@ resultado foi intencional: ICMS de exportação = zero.
 
 | Verificação | Resultado |
 |---|---|
-| `pytest` | **27 testes verdes** |
+| `pytest` | **28 testes verdes** |
 | Golden tests do enunciado | 6 cenários (inclui R$ 100 → R$ 10,60) |
 | Propriedades (hypothesis) | HALF_UP, sem incidência, idempotência, crédito null |
 | Gate de reconciliação | **1.387/1.387** notas |
@@ -70,14 +70,16 @@ Testes novos relevantes:
 - `test_coerencia_catalogo_itens` — item segue o catálogo salvo regra de operação.
 - `test_exportacao_icms_template_fallback` — flag reproduz o template quando
   desligado.
+- `test_simulador_e_se_repasse` — o repasse muda preço/débito quando a alíquota
+  difere de 26,5%.
 
 ---
 
 ## 5. Riscos residuais
 
 1. **Contradição oficial:** o template mostra ICMS 43,43 na exportação; adotamos
-   zero por decisão de negócio. Se a banca usar o template, 447 itens divergem em
-   hoje/2027.
+   zero por decisão de negócio. Se a banca usar o template, **256 itens** divergem
+   em hoje/2027 (dos 447 exportados; 191 já tinham ICMS zero).
 2. **`REVISAR`:** nenhum item cai abaixo de 0,70 hoje; se a organização exigir
    revisão forçada, o limiar pode ser elevado.
 3. **Dados sintéticos:** os valores simulam o case e não uma empresa real.

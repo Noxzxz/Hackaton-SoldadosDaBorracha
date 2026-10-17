@@ -25,6 +25,7 @@ if str(RAIZ) not in sys.path:
 
 from src.caminhos import OUT_DIR  # noqa: E402
 from src.io_dados import cadastro as carregar_cadastro  # noqa: E402
+from src.simular import simular_e_se  # noqa: E402
 
 CENARIOS = ["hoje", "2027", "2033"]
 
@@ -241,24 +242,34 @@ with aba[5]:
         "O recálculo escala CBS e IBS pela razao entre a aliquota escolhida e a de referencia "
         "(26,5%) e aplica o repasse sobre o preco de venda de 2033."
     )
-    fator = aliq / 26.5
-    det = itens.copy()
-    for c in ("2027", "2033"):
-        det[f"imposto_{c}"] = det[f"imposto_{c}"] * fator
-        # P16: escala os creditos na mesma proporcao para manter a coerencia.
-        if f"credito_{c}" in det.columns:
-            det[f"credito_{c}"] = det[f"credito_{c}"].astype(float) * fator
-    det["vProd_repasse"] = det["vProd"] * (1 + (repasse / 100.0) * (fator - 1))
-    deb = det.loc[det["perspectiva"] == "venda", "imposto_2033"].sum()
-    cred = det.loc[det["perspectiva"] == "compra", "credito_2033"].fillna(0).sum()
-    st.metric("Imposto liquido 2033 (simulado)", brl(deb - cred))
-    st.metric("Debitos (vendas) 2033", brl(deb))
-    st.metric("Creditos (compras) 2033", brl(cred))
+    res = simular_e_se(itens, aliq, repasse)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Liquido 2033 (sem repasse)", brl(res["liquido_sem_repasse"]))
+    c2.metric(
+        "Liquido 2033 (com repasse)",
+        brl(res["liquido_com_repasse"]),
+        delta=brl(res["debitos_com_repasse"] - res["debitos_sem_repasse"]),
+    )
+    c3.metric(
+        "Preco de venda 2033",
+        brl(res["preco_repasse"]),
+        delta=brl(res["delta_preco"]),
+    )
+    st.metric("Debitos com repasse (vendas 2033)", brl(res["debitos_com_repasse"]))
+    st.metric("Creditos (compras 2033)", brl(res["creditos"]))
+    st.caption(
+        "O repasse so altera preco/debito quando a aliquota difere de 26,5%; "
+        "creditos de compra nao sao repassados."
+    )
 
     eq = dados.get("equilibrio")
     if eq is not None and len(eq):
         st.subheader("Produtos que mais precisam subir preco")
         cols = [c for c in ["cProd", "preco_hoje", "preco_equilibrio_2033", "variacao_pct_2033"] if c in eq.columns]
         st.dataframe(eq[cols].head(15), width="stretch", hide_index=True)
+        st.caption(
+            "Tabela de equilibrio calculada com as premissas base; os sliders "
+            "acima nao recalculam esta tabela."
+        )
 
 st.caption("Documento sintetico para hackathon - sem valor fiscal. Fonte: LC 214/2025 (tabelas oficiais) + premissas do case.")

@@ -173,9 +173,10 @@ A baseline de ICMS está em `BASELINE-ICMS-EXPORTACAO.md` e nos arquivos
 
 ## 8. Testes e validação
 
-- `python -m pytest -q` → **27 testes verdes**.
+- `python -m pytest -q` → **28 testes verdes**.
 - 6 golden tests do enunciado (incluindo R$ 100 → R$ 10,60).
 - Testes de propriedade (HALF_UP, sem incidência, idempotência, crédito null).
+- Teste do simulador "e se?": repasse muda preço/débito quando a alíquota difere.
 - Gate de reconciliação: **1.387/1.387** notas.
 - `scripts/validar_entrega.py` → `TUDO OK`.
 - Validador oficial do pacote → `FORMATO OK`.

@@ -15,8 +15,9 @@
 **A solução continua válida e não precisa ser refeita.** O pacote novo muda o
 empacotamento (DOCX/XLSX/templates), os pesos da avaliação e adiciona duas
 ressalvas; os dados são semanticamente os mesmos. A **classificação** dos 15.000
-itens não mudou. A **simulação** muda apenas nos 447 itens de exportação, por
-decisão de tratar o ICMS destacado como erro de emissão (zero).
+itens não mudou. A **simulação** muda apenas nos 256 itens de exportação com ICMS
+destacado (dos 447 exportados; os outros 191 já eram zero), por decisão de tratar
+o ICMS como erro de emissão.
 
 Evidências após `rodar_tudo.py --reparse` lendo o pacote oficial:
 
@@ -29,7 +30,7 @@ Evidências após `rodar_tudo.py --reparse` lendo o pacote oficial:
 | Confiança mínima / média | 0,72 / 0,86 | **0,72 / 0,865** |
 | Imposto Seletivo | 497 | **497** |
 | Líquido hoje / 2027 / 2033 | −1.487.825,47 / −23.645.996,36 / −67.569.596,33 | **−1.531.652,64 / −23.689.823,53 / −67.569.596,33** (ICMS de exportação = zero) |
-| Testes | 26 verdes | **27 verdes** |
+| Testes | 26 verdes | **28 verdes** |
 | Validador oficial | — | **FORMATO OK** |
 
 Além disso, **3 dos 4 itens do template oficial** batem exatamente com a nossa
@@ -166,7 +167,7 @@ nosso CSV grava `000001`, que é o formato aceito pelo validador.
 | `src/simular.py` | Adiciona `variacao_vs_hoje_pct` ao resumo, igual ao template oficial. |
 | `config/parametros.yaml`, `src/premissas.py`, `src/simular.py` | Flag `tratamento_exportacao.icms_zero` (default `true` = zero; `false` = template). |
 | `config/parametros.yaml`, `src/caminhos.py`, `DECISOES.md` | Nota do CNPJ atualizada para o valor oficial `...104`. |
-| `tests/test_simulacao.py` | Golden de exportação atualizado para zero + teste de fallback do template (27º teste). |
+| `tests/test_simulacao.py` | Golden de exportação para zero, fallback do template e teste do simulador de repasse (28º teste). |
 
 ### Como alternar a leitura de exportação
 
@@ -177,7 +178,8 @@ tratamento_exportacao:
                      # false = reproduz o template (ICMS 43,43)
 ```
 
-Impacto de **desligar** o flag (voltar ao ICMS destacado, 447 itens de exportação):
+Impacto de **desligar** o flag (voltar ao ICMS destacado: 256 itens afetados, dos
+447 exportados):
 
 | Cenário | Líquido com ICMS zero (atual) | Líquido com ICMS destacado |
 |---|---:|---:|
@@ -212,7 +214,7 @@ A diferença é R$ 43.827,17 de ICMS destacado nas exportações.
 cd solucao
 python scripts/rodar_tudo.py --reparse      # le o pacote oficial (XLSX)
 python scripts/validar_entrega.py           # checklist interno
-python -m pytest -q                         # 27 testes
+python -m pytest -q                         # 28 testes
 python "<pacote>/templates-entrega/validar_entrega.py" ".\saida"  # FORMATO OK
 ```
 

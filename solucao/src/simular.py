@@ -146,6 +146,51 @@ def resumo(itens_simulados: list) -> list:
 
 
 # --------------------------------------------------------------------------- #
+# Simulador "e se?" do painel (aliquota + repasse de preco)
+# --------------------------------------------------------------------------- #
+
+
+def simular_e_se(itens: pd.DataFrame, aliquota_pct: float, repasse_pct: float) -> dict:
+    """Recalcula 2033 para o painel com aliquota e repasse de preco.
+
+    - escala CBS/IBS (e creditos) pela razao aliquotas / 26,5%;
+    - repasse incide apenas no preco de venda: o imposto de venda acompanha o
+      novo preco, porque a base do IBS/CBS e o vProd;
+    - creditos de compra nao sao repassados.
+    """
+    fator = float(aliquota_pct) / 26.5
+    det = itens.copy()
+    for c in ("2027", "2033"):
+        det[f"imposto_{c}"] = det[f"imposto_{c}"].astype(float) * fator
+        if f"credito_{c}" in det.columns:
+            det[f"credito_{c}"] = det[f"credito_{c}"].astype(float) * fator
+
+    vendas = det["perspectiva"] == "venda"
+    det["fator_preco"] = 1.0
+    mask = vendas & (det["vProd"].astype(float) != 0)
+    det.loc[mask, "fator_preco"] = 1 + (float(repasse_pct) / 100.0) * (fator - 1)
+    det["vProd_repasse"] = det["vProd"].astype(float) * det["fator_preco"]
+    det["imposto_2033_repasse"] = det["imposto_2033"] * det["fator_preco"]
+
+    deb_sem = float(det.loc[vendas, "imposto_2033"].sum())
+    deb_com = float(det.loc[vendas, "imposto_2033_repasse"].sum())
+    cred = float(det.loc[~vendas, "credito_2033"].fillna(0).sum())
+    preco_base = float(det.loc[vendas, "vProd"].astype(float).sum())
+    preco_rep = float(det.loc[vendas, "vProd_repasse"].sum())
+    return {
+        "fator": fator,
+        "debitos_sem_repasse": deb_sem,
+        "debitos_com_repasse": deb_com,
+        "creditos": cred,
+        "liquido_sem_repasse": deb_sem - cred,
+        "liquido_com_repasse": deb_com - cred,
+        "preco_base": preco_base,
+        "preco_repasse": preco_rep,
+        "delta_preco": preco_rep - preco_base,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # API de alto nivel
 # --------------------------------------------------------------------------- #
 
@@ -214,10 +259,12 @@ if __name__ == "__main__":
     assert s["hoje"]["imposto"] == Decimal("0.00")
     assert s["2027"]["imposto"] == Decimal("0.00")
     assert s["2033"]["imposto"] == Decimal("0.00")
-    # MACARPE export 410004, 620.40, 43.43
+    # MACARPE export 410004, 620.40, 43.43 (ICMS destacado e erro de emissao)
+    # Default do case: CFOP 7xxx -> ICMS zero. O fallback do template (43,43)
+    # esta coberto por tests/test_simulacao.py::test_exportacao_icms_template_fallback.
     s = simular_item(Decimal("620.40"), Decimal("43.43"), "410004", "7102", "venda", "", "tributado")
-    assert s["hoje"]["imposto"] == Decimal("43.43"), s
-    assert s["2027"]["imposto"] == Decimal("43.43")
+    assert s["hoje"]["imposto"] == Decimal("0.00"), s
+    assert s["2027"]["imposto"] == Decimal("0.00")
     assert s["2033"]["imposto"] == Decimal("0.00")
     # RFCLAR bonificacao 410001, 49.46, 0
     s = simular_item(Decimal("49.46"), Decimal("0"), "410001", "5910", "venda", "", "monofasico")
