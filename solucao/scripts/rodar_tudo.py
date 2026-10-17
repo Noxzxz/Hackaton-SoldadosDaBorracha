@@ -22,6 +22,11 @@ def main() -> int:
     ap.add_argument("--reparse", action="store_true", help="reextrai os PDFs")
     ap.add_argument("--testes", action="store_true", help="roda os testes no final")
     ap.add_argument(
+        "--sem-llm",
+        action="store_true",
+        help="nao aciona o juiz LLM (dry-run; mantem a decisao deterministica)",
+    )
+    ap.add_argument(
         "--workers",
         type=int,
         default=None,
@@ -42,8 +47,18 @@ def main() -> int:
         return 2
 
     print("[2/6] catalogo + cascata de classificacao + simulacao + exportacao")
-    info = exportar_tudo(salvar_painel=True)
+    info = exportar_tudo(salvar_painel=True, usar_llm=not args.sem_llm)
     print(f"      itens simulados={info['n_itens']} politica={info['politica']}")
+    fila = info.get("fila_llm")
+    if fila:
+        estado = "habilitado" if fila["habilitado"] else "dry-run (sem modelo/chave)"
+        print(
+            f"      juiz LLM [{estado}]: fila={fila['n_fila']} llm={fila['n_llm']} "
+            f"revisar={fila['n_revisar']} regra={fila['n_regra']} "
+            f"chamadas={fila['chamadas']} tokens={fila['tokens_entrada']}/{fila['tokens_saida']}"
+        )
+    elif args.sem_llm:
+        print("      juiz LLM desativado por --sem-llm")
 
     print("[3/6] resumo por cenario")
     for r in info["resumo"]:

@@ -1,0 +1,35 @@
+# Ponto unico de encaixe do modelo (PLUG POINT).
+#
+# Na entrega, basta confirmar `modelo` e a chave de API. Todo o resto da
+# solucao le APENAS este arquivo: nao ha modelo/chave hardcoded no codigo.
+#
+# Provider configurado: OpenCode Go (compativel com a API OpenAI).
+#   base_url ....... https://opencode.ai/inference/go/openai/v1
+#   modelo ......... deepseek-v4.1-flash
+#   chave .......... precedencia:
+#                     1) variavel de ambiente `api_key_env` (OPENCODE_GO_API_KEY)
+#                     2) arquivo config/llm_key.txt (gitignored; nao commitado)
+#                     3) auth.json do opencode (provider opencode-go)
+provedor: openai_compativel
+base_url: "https://opencode.ai/inference/go/openai/v1"
+modelo: "deepseek-v4.1-flash"
+api_key_env: OPENCODE_GO_API_KEY
+api_key_arquivo: "llm_key.txt"
+
+# Fallback de credencial (nao commitar segredos). Le o auth.json do opencode.
+auth_json_opencode: true
+provider_auth: "opencode-go"
+
+# Parametros fixos do juiz (nao variam por modelo).
+# DeepSeek V4.1 Flash e um modelo de raciocinio: o `reasoning_content` consome
+# tokens antes do JSON final, por isso max_tokens folgado.
+temperatura: 0
+max_tokens: 2000
+timeout_s: 90
+usar_embeddings: false
+saida_json_obrigatoria: true
+
+# O que fazer com a fila ambigua quando o LLM nao esta disponivel:
+#   usar_regra -> mantem a decisao deterministica (entrega valida)
+#   revisar    -> marca o item como REVISAR (confianca < 0,70)
+comportamento_sem_llm: usar_regra

@@ -25,7 +25,8 @@ import pandas as pd
 import yaml
 
 from .caminhos import CONFIG_DIR
-from .ncm_match import candidatos, numero_linha
+from .io_dados import mapa as _carregar_mapa
+from .ncm_match import numero_linha
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,141 @@ def regras_operacao() -> list:
 
 def _override_por_ncm() -> dict:
     return {o["ncm"]: o for o in overrides_cfg()}
+
+
+def _condicoes_cfg() -> dict:
+    return _yaml("condicoes.yaml")["condicoes"]
+
+
+def _excecoes_cfg() -> dict:
+    return _yaml("excecoes.yaml")["excecoes"]
+
+
+# --------------------------------------------------------------------------- #
+# Avaliacao do mapa (vigencia + permissao + condicao + excecao + anexo)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass
+class AvaliacaoMapa:
+    """Resultado da avaliacao da(s) linha(s) do mapa para um NCM.
+
+    Antes o classificador olhava apenas `permissao == PERMITIDO` e o desempate
+    por familia. Agora a coluna `condicao` (via condicoes.yaml), a `excecao`
+    (via excecoes.yaml), a `vigente` e o `item_do_anexo` sao efetivamente
+    avaliados. Condicao desconhecida NAO elimina a classe silenciosamente:
+    marca `ambiguidade_condicao` e a decisao vai para o juiz (LLM).
+    """
+
+    ncm: str
+    tipo_match: str
+    candidatos: pd.DataFrame
+    eliminados: list
+    evidencia: list
+    ambiguidade_condicao: bool
+    classes_brutas: list
+
+    @property
+    def classes(self) -> list:
+        if not len(self.candidatos):
+            return []
+        return sorted(self.candidatos["cClassTrib"].unique().tolist())
+
+
+def avaliar_mapa(ncm: str) -> AvaliacaoMapa:
+    """Avalia as linhas do mapa oficial aplicando vigencia/condicao/excecao.
+
+    Ordem de casamento identica a `ncm_match.candidatos` (exato -> prefixo6 ->
+    prefixo4), mas com filtro de vigencia, condicao e excecao.
+    """
+    m = _carregar_mapa()
+    ncm = str(ncm).zfill(8)
+    condicoes = _condicoes_cfg()
+    excecoes = _excecoes_cfg()
+
+    candidatos = None
+    tipo = "sem_match"
+    for rotulo, filtro in (
+        ("exato", m["NCM"] == ncm),
+        ("prefixo6", m["NCM"].str.startswith(ncm[:6])),
+        ("prefixo4", m["NCM"].str.startswith(ncm[:4])),
+    ):
+        sel = m[filtro & (m["permissao"] == "PERMITIDO")]
+        if len(sel):
+            candidatos = sel
+            tipo = rotulo
+            break
+
+    if candidatos is None:
+        return AvaliacaoMapa(
+            ncm=ncm,
+            tipo_match="sem_match",
+            candidatos=m.iloc[0:0].copy(),
+            eliminados=[],
+            evidencia=[f"NCM {ncm} fora do mapa"],
+            ambiguidade_condicao=False,
+            classes_brutas=[],
+        )
+
+    evidencia: list = []
+    eliminados: list = []
+    ambiguidade_condicao = False
+    classes_brutas = sorted(candidatos["cClassTrib"].unique().tolist())
+    mantidos = []
+    for _, r in candidatos.iterrows():
+        cls = str(r["cClassTrib"])
+        vigente = str(r.get("vigente", "sim") or "sim")
+        if vigente != "sim":
+            eliminados.append((cls, f"vigencia != sim ({vigente})"))
+            continue
+        condicao = str(r.get("condicao", "") or "").strip()
+        if condicao:
+            regra = condicoes.get(condicao)
+            if regra is None:
+                # condicao nao mapeada: nao presume; marca para o juiz decidir
+                ambiguidade_condicao = True
+                evidencia.append(
+                    f"{cls}: condicao nao reconhecida '{condicao}' -> encaminhada ao juiz"
+                )
+            elif regra.get("satisfaz") is False:
+                eliminados.append((cls, f"condicao nao satisfeita: {condicao}"))
+                continue
+            else:
+                evidencia.append(f"{cls}: condicao satisfeita '{condicao}'")
+        mantidos.append(r)
+
+    classes_atuais = {str(r["cClassTrib"]) for r in mantidos}
+    restantes = []
+    for r in mantidos:
+        cls = str(r["cClassTrib"])
+        excecao = str(r.get("excecao", "") or "").strip()
+        if excecao:
+            regra = excecoes.get(excecao)
+            if (
+                regra
+                and regra.get("remove_classe")
+                and str(regra.get("quando_existe")) in classes_atuais
+            ):
+                eliminados.append(
+                    (cls, f"excecao '{excecao}' (precedencia {regra['quando_existe']})")
+                )
+                continue
+        restantes.append(r)
+
+    df = (
+        pd.DataFrame(restantes, columns=m.columns)
+        if restantes
+        else m.iloc[0:0].copy()
+    )
+    return AvaliacaoMapa(
+        ncm=ncm,
+        tipo_match=tipo,
+        candidatos=df,
+        eliminados=eliminados,
+        evidencia=evidencia,
+        ambiguidade_condicao=ambiguidade_condicao,
+        classes_brutas=classes_brutas,
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -170,6 +306,12 @@ class Decisao:
     tipo_match: str = ""
     linha_mapa: Optional[int] = None
     trilha: list = field(default_factory=list)
+    ambiguo: bool = False
+    ambiguidade_condicao: bool = False
+    candidatos_classe: list = field(default_factory=list)
+    candidatos_brutos: list = field(default_factory=list)
+    evidencia_mapa: list = field(default_factory=list)
+    eliminados: list = field(default_factory=list)
 
 
 def _vazia(familia: str) -> Decisao:
@@ -226,10 +368,13 @@ def classificar_produto(
             tipo_match="cnae",
         )
 
-    cands, tipo = candidatos(ncm)
-    classes = sorted(cands["cClassTrib"].unique().tolist()) if len(cands) else []
+    aval = avaliar_mapa(ncm)
+    tipo = aval.tipo_match
+    classes = aval.classes
+    cands = aval.candidatos
 
     classe_mapa = _classe_por_familia(familia, classes, tipo)
+    ambiguo = len(classes) > 1 or aval.ambiguidade_condicao
 
     if classe_mapa is not None:
         escolhida = classe_mapa
@@ -250,6 +395,10 @@ def classificar_produto(
             f"MAPA L{linha} NCM {ncm} {tipo}; familia {familia}"
             + (f"; Anexo {anexo}" if anexo else "")
         )
+        if ambiguo:
+            fonte += f"; AMBIGUO candidatos={classes}"
+            if aval.ambiguidade_condicao:
+                fonte += "; condicao nao mapeada"
         dec = Decisao(
             cClassTrib=escolhida,
             status="CLASSIFICADO",
@@ -261,6 +410,12 @@ def classificar_produto(
             classe_mapa=escolhida,
             tipo_match=tipo,
             linha_mapa=linha,
+            ambiguo=ambiguo,
+            ambiguidade_condicao=aval.ambiguidade_condicao,
+            candidatos_classe=classes,
+            candidatos_brutos=aval.classes_brutas,
+            evidencia_mapa=aval.evidencia,
+            eliminados=aval.eliminados,
         )
     else:
         # guarda de prefixo rejeitou a aparencia, ou NCM sem match
@@ -283,6 +438,10 @@ def classificar_produto(
             imposto_seletivo=is_flag,
             classe_mapa="000001",
             tipo_match=tipo,
+            candidatos_classe=classes,
+            candidatos_brutos=aval.classes_brutas,
+            evidencia_mapa=aval.evidencia,
+            eliminados=aval.eliminados,
         )
 
     # Overrides de divergencia (politica alinhada_gabarito)
@@ -327,6 +486,7 @@ def construir_catalogo(itens: pd.DataFrame, cadastro: pd.DataFrame) -> pd.DataFr
                 "cProd": r["cProd"],
                 "NCM": r["NCM"],
                 "xProd_norm": xnorm,
+                "cnae": str(cnae),
                 "familia": dec.familia,
                 "cClassTrib": dec.cClassTrib,
                 "classe_mapa": dec.classe_mapa,
@@ -337,6 +497,15 @@ def construir_catalogo(itens: pd.DataFrame, cadastro: pd.DataFrame) -> pd.DataFr
                 "divergente": dec.divergente,
                 "tipo_match": dec.tipo_match,
                 "linha_mapa": dec.linha_mapa,
+                "ambiguo": bool(dec.ambiguo),
+                "ambiguidade_condicao": bool(dec.ambiguidade_condicao),
+                "candidatos_classe": ";".join(dec.candidatos_classe),
+                "candidatos_brutos": ";".join(dec.candidatos_brutos),
+                "evidencia_mapa": " | ".join(dec.evidencia_mapa),
+                "eliminados": " | ".join(
+                    f"{c}: {m}" for c, m in dec.eliminados
+                ),
+                "metodo": "regra",
             }
         )
     df = pd.DataFrame(linhas)
@@ -410,6 +579,8 @@ def classificar_itens(
             divergente = bool(base["divergente"])
             tipo_match = base["tipo_match"]
             status_base = str(base.get("status", "CLASSIFICADO"))
+            metodo = str(base.get("metodo", "regra"))
+            ambiguo = bool(base.get("ambiguo", False))
         else:
             # produto fora do catalogo: classifica na hora
             xnorm = _norm(r["xProd"])
@@ -425,6 +596,8 @@ def classificar_itens(
             divergente = dec.divergente
             tipo_match = dec.tipo_match
             status_base = "CLASSIFICADO" if dec.cClassTrib else "REVISAR"
+            metodo = "regra"
+            ambiguo = bool(dec.ambiguo)
 
         # perspectiva e cadastro
         dest = r["destinatario_cnpj"]
@@ -474,6 +647,8 @@ def classificar_itens(
                 "tipo_match": tipo_match,
                 "emitente_cnae": emit_cnae,
                 "tipo_cliente": tipo_cliente,
+                "metodo": metodo,
+                "ambiguo": ambiguo,
             }
         )
     return pd.DataFrame(out)

@@ -9,3 +9,7 @@ logs/
 # artefatos de processo (P27)
 FIM.flag
 PROGRESSO.md
+
+# segredo local (nunca commitar a chave do modelo)
+config/llm_key.txt
+.env

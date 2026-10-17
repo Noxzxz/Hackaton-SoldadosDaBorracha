@@ -18,6 +18,7 @@ from .classificar import classificar_itens, construir_catalogo, politica
 from .equilibrio import precos_equilibrio
 from .extrair import extrair_tudo
 from .io_dados import cadastro as carregar_cadastro
+from .llm_juiz import resolver_fila
 from .simular import resumo as calc_resumo
 from .simular import simular_dataframe
 from .trilha import construir_trilha, salvar_trilha
@@ -85,11 +86,21 @@ def _salvar_simulados(itens, classificados, simulados) -> None:
     pd.DataFrame(rows).to_parquet(OUT_DIR / "itens_simulados.parquet", index=False)
 
 
-def exportar_tudo(salvar_painel: bool = True) -> dict:
+def exportar_tudo(salvar_painel: bool = True, usar_llm: bool = True) -> dict:
     itens, notas = extrair_tudo()
     cad = carregar_cadastro()
 
     catalogo = construir_catalogo(itens, cad)
+    fila = None
+    if usar_llm:
+        catalogo, fila = resolver_fila(catalogo)
+        if fila is not None and fila.auditoria:
+            pd.DataFrame(fila.auditoria).to_csv(
+                OUT_DIR / "auditoria_ambiguos.csv",
+                sep=";",
+                index=False,
+                encoding="utf-8-sig",
+            )
     classificados = classificar_itens(itens, cad, catalogo)
     simulados = simular_dataframe(itens, classificados, cad)
     resumo = calc_resumo(simulados)
@@ -137,6 +148,20 @@ def exportar_tudo(salvar_painel: bool = True) -> dict:
         "politica": politica(),
         "reconciliadas": int(notas["reconciliada"].astype(bool).sum()),
         "n_notas": len(notas),
+        "fila_llm": (
+            {
+                "habilitado": fila.habilitado,
+                "n_fila": fila.n_fila,
+                "n_llm": fila.n_llm,
+                "n_revisar": fila.n_revisar,
+                "n_regra": fila.n_regra,
+                "chamadas": fila.chamadas,
+                "tokens_entrada": fila.tokens_entrada,
+                "tokens_saida": fila.tokens_saida,
+            }
+            if fila is not None
+            else None
+        ),
     }
 
 
