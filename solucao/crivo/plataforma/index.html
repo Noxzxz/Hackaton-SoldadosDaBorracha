@@ -1,0 +1,1326 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Crivo · Meridional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: aplicativo com barra lateral de módulos (no celular vira faixa rolável) e área de trabalho de uma coluna. */
+:root {
+  --bg: #F2F5F5;
+  --surface: #FFFFFF;
+  --surface-2: #F6F8F8;
+  --ink: #10202A;
+  --muted: #55656E;
+  --faint: #86939A;
+  --line: #D9E0E2;
+  --brand: #0B5563;
+  --brand-ink: #FFFFFF;
+  --brand-soft: #E1EEF0;
+  --up: #C2560C;
+  --up-soft: #FBEBDF;
+  --down: #2463A8;
+  --down-soft: #E3EDF8;
+  --warn: #8A5A00;
+  --warn-soft: #FFF2D6;
+  --ok: #1D6B3A;
+  --ok-soft: #E2F2E7;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1618; --surface: #152024; --surface-2: #1A272B; --ink: #E5EDEF; --muted: #9DAEB4; --faint: #6F8188;
+    --line: #2A3B41; --brand: #5FB3C2; --brand-ink: #0E1618; --brand-soft: #18363C;
+    --up: #D06A2A; --up-soft: #3A2516; --down: #4F8FD6; --down-soft: #172D45;
+    --warn: #E0B04A; --warn-soft: #3A2E12; --ok: #5DBB7E; --ok-soft: #173325;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1618; --surface: #152024; --surface-2: #1A272B; --ink: #E5EDEF; --muted: #9DAEB4; --faint: #6F8188;
+  --line: #2A3B41; --brand: #5FB3C2; --brand-ink: #0E1618; --brand-soft: #18363C;
+  --up: #D06A2A; --up-soft: #3A2516; --down: #4F8FD6; --down-soft: #172D45;
+  --warn: #E0B04A; --warn-soft: #3A2E12; --ok: #5DBB7E; --ok-soft: #173325;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font: 400 14px/1.55 var(--sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+.mono, code { font-family: var(--mono); }
+code { font-size: 0.92em; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--brand); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 28px; max-width: 1400px; margin: 0 auto; }
+.side { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; padding-block: 18px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; letter-spacing: 0.01em; padding-inline: 6px; }
+.brand svg { width: 28px; height: 28px; flex: none; }
+.brand small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.02em; }
+.ws { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; display: grid; gap: 2px; }
+.ws b { font-size: 13.5px; }
+.ws span { color: var(--muted); }
+nav.mods { display: grid; gap: 2px; }
+nav.mods .grp { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); font-weight: 600; padding: 12px 10px 4px; }
+nav.mods a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px; color: var(--muted); text-decoration: none; font-weight: 500; }
+nav.mods a:hover { background: var(--surface); color: var(--ink); }
+nav.mods a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+nav.mods a .badge { margin-left: auto; font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); }
+nav.mods a .badge.zero { background: var(--surface-2); color: var(--faint); }
+.side .foot { margin-top: auto; font-size: 11.5px; color: var(--faint); padding-inline: 6px; }
+
+.content { min-width: 0; padding-block: 18px 72px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+.bar .crumb { font-size: 12px; color: var(--muted); }
+.bar .spacer { flex: 1; }
+.persona { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.persona select { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-weight: 500; }
+
+@media (max-width: 980px) {
+  .app { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .side { position: static; height: auto; padding-block: 14px 6px; gap: 10px; }
+  .ws { display: none; }
+  nav.mods { display: flex; overflow-x: auto; gap: 4px; scrollbar-width: none; padding-bottom: 6px; }
+  nav.mods .grp { display: none; }
+  nav.mods a { white-space: nowrap; }
+  .side .foot { display: none; }
+}
+
+section.page { display: grid; gap: 20px; }
+.lead { color: var(--muted); max-width: 72ch; margin-top: 4px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.panel-head p { color: var(--muted); font-size: 13px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 16px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+
+.kpi { display: grid; gap: 6px; align-content: start; }
+.kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+.kpi .value { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+.kpi .delta { font-size: 13px; font-weight: 500; }
+.kpi .sub { font-size: 12.5px; color: var(--muted); display: grid; gap: 2px; }
+.kpi .origin { font-size: 12px; color: var(--faint); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 4px; }
+.up { color: var(--up); } .down { color: var(--down); }
+.finding { font-size: 16px; line-height: 1.5; max-width: 82ch; }
+
+.card-link { text-decoration: none; color: inherit; }
+.card-link:hover { border-color: var(--brand); }
+.card-link .go { font-size: 12.5px; color: var(--brand); font-weight: 500; margin-top: 4px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; color: var(--muted); font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); }
+.switch input { width: 16px; height: 16px; accent-color: var(--brand); }
+.range { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.range input { accent-color: var(--brand); width: 150px; }
+.range output { font-family: var(--mono); color: var(--ink); min-width: 52px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-weight: 500; }
+.btn:hover { border-color: var(--brand); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.small { padding: 3px 10px; font-size: 12.5px; }
+textarea, input[type="search"] { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+textarea { min-height: 68px; resize: vertical; }
+select.st { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 12.5px; }
+
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; }
+.chart text { fill: var(--muted); font-family: var(--sans); font-size: 11.5px; }
+.chart .val { fill: var(--ink); font-weight: 600; font-family: var(--mono); font-size: 11px; }
+.chart .axis { stroke: var(--line); }
+.chart .grid { stroke: var(--line); stroke-dasharray: 2 4; }
+.note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+#tip { position: fixed; z-index: 30; pointer-events: none; background: var(--ink); color: var(--surface); padding: 8px 10px; border-radius: 6px; font-size: 12.5px; max-width: 300px; line-height: 1.4; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+#toast { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 8px; font-size: 13.5px; box-shadow: 0 6px 20px rgba(0,0,0,.2); max-width: min(560px, calc(100vw - 32px)); }
+
+.table-wrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; white-space: nowrap; background: var(--surface); position: sticky; top: 0; z-index: 1; }
+td.r, th.r { text-align: right; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover, tbody tr.sel { background: var(--surface-2); }
+.scroll-y { max-height: 540px; overflow: auto; }
+.sub-mono { font-family: var(--mono); color: var(--muted); font-size: 12px; }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; background: var(--brand-soft); color: var(--brand); white-space: nowrap; }
+.chip.mono { font-family: var(--mono); font-size: 11.5px; }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.up { background: var(--up-soft); color: var(--up); }
+.chip.down { background: var(--down-soft); color: var(--down); }
+.chip.plain { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+.trail { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .trail { grid-template-columns: minmax(0, 1fr); } }
+.results { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; max-height: 640px; overflow: auto; }
+.results button { all: unset; display: grid; gap: 2px; width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.results button:hover, .results button[aria-current="true"] { background: var(--brand-soft); }
+.results button:focus-visible { outline: 2px solid var(--brand); }
+.results .t { font-weight: 500; font-size: 13px; }
+.results .s { font-size: 12px; color: var(--muted); }
+.results .tag { font-size: 11px; color: var(--brand); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px 18px; }
+.field .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.field .v { font-weight: 500; overflow-wrap: anywhere; }
+.field .src { font-size: 11.5px; color: var(--faint); }
+.sieve { list-style: none; margin: 0; padding: 0; display: grid; }
+.sieve li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; position: relative; padding-bottom: 14px; }
+.sieve li::before { content: ""; position: absolute; left: 17px; top: 34px; bottom: 0; width: 2px; background: var(--line); }
+.sieve li:last-child::before { display: none; }
+.sieve .dot { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 13px/1 var(--mono); border: 2px solid var(--line); background: var(--surface); color: var(--faint); z-index: 1; }
+.sieve li.passou .dot { border-color: var(--faint); color: var(--muted); }
+.sieve li.reteve .dot { border-color: var(--brand); background: var(--brand); color: var(--brand-ink); }
+.sieve li.nao .body { opacity: 0.55; }
+.sieve .body { padding-top: 6px; display: grid; gap: 4px; }
+.sieve .q { font-weight: 600; }
+.sieve .why { font-size: 13px; color: var(--muted); }
+.sieve li.reteve .why { color: var(--ink); }
+.sieve .state { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; color: var(--faint); }
+.sieve li.reteve .state { color: var(--brand); }
+tr.hit td { background: var(--brand-soft); }
+.calc td { font-family: var(--mono); font-size: 12.5px; }
+.calc td.lbl { font-family: var(--sans); font-size: 13px; }
+.calc tr.tot td { font-weight: 600; border-top: 2px solid var(--ink); }
+.calc .why { font-family: var(--sans); color: var(--muted); font-size: 12px; }
+
+.group { display: grid; gap: 14px; }
+.opts { display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.opt:hover { border-color: var(--brand); }
+.opt input { margin-top: 3px; accent-color: var(--brand); }
+.opt.cur { background: var(--surface-2); }
+.opt .t { font-weight: 600; }
+.opt .d { font-size: 12.5px; color: var(--muted); }
+.opt .imp { text-align: right; font-size: 12.5px; white-space: nowrap; color: var(--muted); }
+.opt .imp b { display: block; font-family: var(--mono); font-size: 13px; }
+@media (max-width: 640px) { .opt { grid-template-columns: 20px minmax(0, 1fr); } .opt .imp { grid-column: 2; text-align: left; } }
+
+.bignums { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.bignums div { display: grid; }
+.bignums b { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.bignums span { font-size: 12px; color: var(--muted); }
+.check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.check-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; }
+.check-list .ic { font-weight: 700; }
+.check-list .ic.ok { color: var(--ok); } .check-list .ic.no { color: var(--warn); }
+.check-list .d { color: var(--muted); font-size: 12.5px; }
+.formula { display: grid; gap: 2px; font-size: 13px; }
+.formula .line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.formula .line b { font-family: var(--mono); font-weight: 600; }
+.formula .res { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 600; }
+.empty { color: var(--muted); padding: 18px; text-align: center; border: 1px dashed var(--line); border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* v3: tarefas, decisão na tela, simulador, evidências em diálogo */
+.search { position: relative; width: min(320px, 100%); }
+.search input[type="search"] { padding: 7px 12px; }
+#res-global { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 25; margin: 0; padding: 6px; max-height: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+#res-global[hidden] { display: none; }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.task > div { min-width: 0; flex: 1 1 240px; }
+.task b { display: block; font-weight: 600; }
+.task .d { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.task.risk { border-left: 3px solid var(--up); }
+.task.warn { border-left: 3px solid var(--warn); }
+.task .btn { flex: none; }
+.split { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 980px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.split #dec-list .panel { position: sticky; top: 12px; }
+.stack { display: grid; gap: 20px; min-width: 0; }
+.stack .panel h3 { margin-bottom: 4px; }
+input.st { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 12.5px; }
+.grp-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); }
+.badge { margin-left: auto; font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); }
+.results .tag { display: block; }
+dialog#evid { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); padding: 0; width: min(960px, calc(100vw - 24px)); max-height: calc(100vh - 48px); }
+dialog#evid::backdrop { background: rgba(10, 20, 24, .45); }
+.evid-top { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.evid-top h2 { font-size: 17px; font-weight: 600; }
+#evid-body { padding: 18px; display: grid; gap: 20px; }
+</style>
+
+<div class="app">
+  <aside class="side" aria-label="Módulos">
+    <div class="brand">
+      <svg viewBox="0 0 28 28" aria-hidden="true">
+        <g fill="var(--faint)"><circle cx="8" cy="5" r="2"/><circle cx="14" cy="4" r="2"/><circle cx="20" cy="5" r="2"/><circle cx="4.5" cy="10" r="2"/><circle cx="4" cy="16" r="2"/><circle cx="4.5" cy="22" r="2"/><circle cx="8" cy="26" r="2"/><circle cx="14" cy="26.5" r="2"/></g>
+        <circle cx="20" cy="25" r="2.6" fill="var(--brand)"/>
+      </svg>
+      <div>Crivo<small>Cada item no código certo</small></div>
+    </div>
+    <div class="ws">
+      <b>Atacadista Meridional</b>
+      <span class="mono">51.238.476/0001-04</span>
+      <span id="ws-lote"></span>
+    </div>
+    <nav class="mods" id="nav"></nav>
+    <div class="foot" id="side-foot"></div>
+  </aside>
+
+  <div class="content">
+    <div class="bar">
+      <div><div class="crumb" id="crumb"></div><h1 id="page-title"></h1></div>
+      <div class="spacer"></div>
+      <div class="search">
+        <input type="search" id="q-global" placeholder="Buscar item, produto ou nota" aria-label="Buscar item">
+        <ul class="results" id="res-global" hidden></ul>
+      </div>
+      <span id="badge-class"></span>
+      <label class="persona" for="sel-persona">Perfil <select id="sel-persona"></select></label>
+    </div>
+
+    <section class="page" id="page-central" hidden>
+      <div class="panel"><p class="finding" id="cen-missao"></p></div>
+      <div class="grid-3" id="cen-kpis"></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Para fazer agora</h3><p>Tarefas do seu perfil, na ordem de impacto.</p></div></div>
+          <ul class="tasks" id="cen-tarefas"></ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Riscos do lote</h3><p>Valem para todos os perfis.</p></div></div>
+          <ul class="tasks" id="cen-riscos"></ul>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Suas ações no plano</h3><p>Em aberto, com responsável e prazo.</p></div><button class="btn small" type="button" data-go="plano">Plano completo</button></div>
+          <ul class="tasks" id="cen-acoes"></ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Últimos registros</h3><p>Decisões, premissas e contestações deste navegador.</p></div><button class="btn small" type="button" data-go="auditoria">Auditoria</button></div>
+          <ul class="tasks" id="cen-log"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-decisoes" hidden>
+      <p class="lead">Cada grupo é um produto que recebe a mesma classe. Escolha a classe, veja o efeito no imposto antes de confirmar e registre a justificativa. A decisão vale para todos os itens do grupo.</p>
+      <div class="split">
+        <div id="dec-list"></div>
+        <div id="dec-detail" class="stack"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-plano" hidden>
+      <p class="lead">Tudo o que precisa virar tarefa: o que o lote gerou e o que as decisões encaminharam. Cada ação tem responsável, prazo e status, salvos neste navegador.</p>
+      <div class="panel">
+        <div class="panel-head"><div><h3>Nova ação</h3><p>Para o que aparecer fora do lote.</p></div></div>
+        <div class="row">
+          <input type="text" id="na-t" class="st" placeholder="O que precisa ser feito" style="flex:1;min-width:220px;padding:8px 10px;font-size:13.5px">
+          <select id="na-d" class="st" aria-label="Responsável" style="padding:8px 10px;font-size:13.5px"></select>
+          <input type="text" id="na-p" class="st" placeholder="Prazo, ex.: 30/11/2026" style="width:170px;padding:8px 10px;font-size:13.5px">
+          <button class="btn primary" id="na-add" type="button" disabled>Adicionar</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px"><label class="switch"><input type="checkbox" id="opt-minhas"> Só as do meu perfil</label></div>
+        <div class="table-wrap"><table id="tb-plano"></table></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-impacto" hidden>
+      <div class="row"><p class="lead" style="flex:1;min-width:260px">Leitura do imposto líquido da Meridional (débitos das vendas menos créditos das compras), hoje e nos dois marcos da reforma. Use para entender o efeito antes de decidir.</p>
+        <label class="switch"><input type="checkbox" id="opt-uso" checked> Incluir compras de uso e consumo</label></div>
+      <div class="panel"><p class="finding" id="finding"></p></div>
+      <div class="grid-3" id="kpis"></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><h3>De hoje ao cenário, por tributo</h3><p>O que move o imposto líquido. Laranja aumenta o valor a pagar; azul reduz.</p></div>
+            <div class="seg" role="group" aria-label="Cenário da ponte"><button type="button" data-ponte="2027" aria-pressed="false">2027</button><button type="button" data-ponte="2033" aria-pressed="true">2033</button></div></div>
+          <div class="chart" id="ch-ponte"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Transição ano a ano</h3><p>Imposto líquido estimado de 2026 a 2033.</p></div>
+            <label class="range">Alíquota de referência <input type="range" id="opt-aliq" min="26.5" max="28" step="0.1" value="26.5"><output id="out-aliq">26,5%</output></label></div>
+          <div class="chart" id="ch-trans"></div>
+          <p class="note" id="trans-note"></p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h3>Onde a Meridional ganha e onde perde em 2033</h3><p>Efeito no imposto líquido por produto. Clique numa barra para abrir o preço do produto.</p></div><a href="#precos">Preços e repasse</a></div>
+        <div class="chart" id="ch-top"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-precos" hidden>
+      <div class="row"><p class="lead" style="flex:1;min-width:260px">Preço de venda que mantém a margem de hoje de cada produto, usando o custo e o crédito das compras do mesmo produto. Clique em um produto para ver a conta.</p>
+        <div class="seg" role="group" aria-label="Cenário"><button type="button" data-pcen="2027" aria-pressed="false">2027</button><button type="button" data-pcen="2033" aria-pressed="true">2033</button></div></div>
+      <div class="panel"><p class="finding" id="pr-finding"></p></div>
+      <div class="grid-3" id="pr-cards"></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Todos os produtos</h3><p id="pr-sub"></p></div><input type="search" id="q-preco" placeholder="Buscar produto" style="max-width:220px" aria-label="Buscar produto"></div>
+          <div class="table-wrap scroll-y"><table id="tb-preco"></table></div>
+        </div>
+        <div class="panel" id="pr-detail"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-parceiros" hidden>
+      <p class="lead">Quem move o crédito e o débito da Meridional. Fornecedores geram crédito nas compras; clientes geram imposto nas vendas.</p>
+      <div class="panel"><p class="finding" id="par-finding"></p></div>
+      <div class="panel"><div class="panel-head"><div><h3>Fornecedores</h3><p>Crédito que cada fornecedor gera para a Meridional, hoje e em 2033.</p></div></div><div class="table-wrap"><table id="tb-forn"></table></div></div>
+      <div class="panel"><div class="panel-head"><div><h3>Clientes</h3><p>Imposto das vendas para cada cliente, hoje e em 2033.</p></div></div><div class="table-wrap"><table id="tb-cli"></table></div></div>
+    </section>
+
+    <section class="page" id="page-motor" hidden>
+      <p class="lead">Cada item passa por peneiras em ordem. A primeira que sabe decidir retém o item; o que nenhuma retém com segurança vai para revisão humana.</p>
+      <div class="panel"><div class="bignums" id="bignums"></div></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-head"><div><h3>Itens retidos por peneira</h3><p>Itens e produtos distintos decididos em cada etapa.</p></div></div><div class="chart" id="ch-funil"></div></div>
+        <div class="panel"><div class="panel-head"><div><h3>Confiança das decisões</h3><p>Itens por nível de confiança. Abaixo de 0,70 vai para revisão.</p></div></div><div class="chart" id="ch-conf"></div></div>
+      </div>
+      <div class="panel" id="pn-tribunal" hidden></div>
+      <div class="panel" id="pn-pipeline" hidden></div>
+      <div class="panel"><div class="panel-head"><div><h3>Conferências automáticas</h3><p>Verificações que não dependem de gabarito.</p></div></div><ul class="check-list" id="checks"></ul></div>
+    </section>
+
+    <section class="page" id="page-premissas" hidden>
+      <p class="lead">Toda escolha que muda um número, com a fonte. Premissas "a confirmar" dependem de validação do controller ou da organização do case.</p>
+      <div class="panel"><div class="table-wrap"><table id="tb-prem"></table></div></div>
+      <div class="panel"><div class="panel-head"><div><h3>Classes usadas</h3><p>Redução sobre a alíquota de referência, conforme parametros.json.</p></div></div><div class="table-wrap"><table id="tb-classes"></table></div></div>
+    </section>
+
+    <section class="page" id="page-auditoria" hidden>
+      <p class="lead">Quem decidiu o quê e quando: revisões, contestações, premissas, ações e exportações. Fica salvo neste navegador.</p>
+      <div class="panel"><div class="table-wrap"><table id="tb-log"></table></div></div>
+    </section>
+
+    <section class="page" id="page-exportar" hidden>
+      <p class="lead">Gera os dois arquivos de entrega com as decisões de revisão já aplicadas, no formato de templates-entrega, e confere com as regras do validar_entrega.py.</p>
+      <div class="grid-3" id="ex-cards"></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-head"><div><h3>Validação do formato</h3><p>Mesmas regras do validar_entrega.py.</p></div></div><ul class="check-list" id="ex-checks"></ul></div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Arquivos</h3><p>Salve os dois na pasta da equipe e rode o validador oficial.</p></div></div>
+          <div style="display:grid;gap:12px">
+            <div class="row"><button class="btn primary" id="dl-csv" type="button">Baixar itens_classificados.csv</button><span class="sub-mono" id="sz-csv"></span></div>
+            <div class="row"><button class="btn primary" id="dl-json" type="button">Baixar simulacao.json</button><span class="sub-mono" id="sz-json"></span></div>
+            <p class="note">Na prévia publicada o navegador pode bloquear o download; na cópia local do repositório ele funciona. Validador oficial: <code>python templates-entrega/validar_entrega.py &lt;pasta&gt;</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<dialog id="evid" aria-labelledby="evid-title">
+  <div class="evid-top"><div><div class="crumb">Evidências do item</div><h2 id="evid-title"></h2></div><button class="btn small" type="button" id="evid-close">Fechar</button></div>
+  <div id="evid-body"></div>
+</dialog>
+<div id="tip" hidden></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="dados/crivo_painel.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.CRIVO;
+if (!D) { document.querySelector(".content").innerHTML = "<div class='panel'><h3>Dados não encontrados</h3><p>Rode <code>python solucao/scripts/rodar_tudo.py</code> e depois <code>python solucao/crivo/gerar_painel.py --pipeline</code> para gerar <code>dados/crivo_painel.js</code>.</p></div>"; return; }
+// ---------- formatação ----------
+const nf2 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const nf1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const nf0 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+const brl = v => (v < 0 ? "−R$ " : "R$ ") + nf2.format(Math.abs(v));
+const brlC = v => { const a = Math.abs(v), s = v < 0 ? "−" : ""; if (a >= 1e6) return s + "R$ " + nf1.format(a / 1e6) + " mi"; if (a >= 1e3) return s + "R$ " + nf1.format(a / 1e3) + " mil"; return s + "R$ " + nf2.format(a); };
+const signC = v => (v > 0.004 ? "+" : "") + brlC(v);
+const pct = v => v == null || !isFinite(v) ? "—" : nf2.format(v) + "%";
+const pctSigned = v => (v > 0 ? "+" : v < 0 ? "−" : "") + nf1.format(Math.abs(v)) + "%";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+const fmtCnpj = c => /^\d{14}$/.test(c) ? c.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5") : (c || "—");
+const quando = iso => new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+const r2 = x => Number((x + (x >= 0 ? 1e-9 : -1e-9)).toFixed(2));
+
+// ---------- armazenamento local (por navegador) ----------
+const store = {
+  get(k, def) { try { const v = localStorage.getItem("crivo." + k); return v ? JSON.parse(v) : def; } catch (e) { return def; } },
+  set(k, v) { try { localStorage.setItem("crivo." + k, JSON.stringify(v)); } catch (e) { /* sem armazenamento: segue em memória */ } },
+};
+
+// ---------- perfis: cada um abre a central com o trabalho dele ----------
+const PERSONAS = {
+  fiscal: { nome: "Analista fiscal", missao: "Seu trabalho é fazer cada item sair com o cClassTrib certo. O motor decidiu quase tudo; o que sobra é a sua fila de decisões." },
+  controller: { nome: "Controller tributário", missao: "Você responde pelo imposto apurado. Confirme as premissas em aberto e acompanhe o que foi decidido, por quem e com que justificativa." },
+  cfo: { nome: "Diretoria financeira", missao: "Você planeja caixa e margem na transição. O ponto principal é o saldo credor que se forma a partir de 2027 e como compensá-lo." },
+  comercial: { nome: "Comercial e pricing", missao: "Você reajusta preços sem perder margem. Decida quais produtos pedem repasse e onde há espaço para baixar preço." },
+  compras: { nome: "Compras", missao: "Você escolhe fornecedores pelo custo líquido de imposto. Com o crédito amplo, toda compra passa a gerar crédito, desde que a nota venha certa." },
+};
+// plano: { over: { id: { status, dono, prazo } }, extra: [ações criadas por decisões ou pelo usuário] }
+let plano = store.get("plano", { over: {}, extra: [] });
+const savePlano = () => store.set("plano", plano);
+let persona = store.get("persona", "fiscal");
+if (!PERSONAS[persona]) persona = "fiscal";
+
+// ---------- dados base ----------
+const IX = Object.fromEntries(D.colunas_item.map((c, i) => [c, i]));
+const EMP = D.empresas, FATOR = D.fatores, CLASSES = D.classes;
+const TRIB = Object.fromEntries(D.produtos.map(p => [p.cProd, p.tributado]));
+const PEN = Object.fromEntries(D.motor.peneiras.map(p => [p.id, p]));
+PEN[6] = { id: 6, nome: "Revisão humana", pergunta: "Uma pessoa decidiu a classe do grupo", detalhe: "Decisão registrada na fila de revisão, com justificativa" };
+const items = D.itens.map((r, i) => {
+  const n = D.notas[r[IX.nota]];
+  const o = { i, chave: n[0], emit: n[1], dest: n[2], data: n[3] };
+  for (const c of D.colunas_item) o[c] = r[IX[c]];
+  o.venda = r[IX.persp] === 1;
+  const cp = EMP[o.contraparte] || {};
+  o.fin = o.venda ? "" : (o.fin || cp.finalidade_compra || "");
+  o.tipo = o.venda ? (cp.tipo_cliente || (String(o.cfop).startsWith("7") ? "exterior" : "")) : "";
+  o.trib = o.trib === 1 || TRIB[o.cProd] === "tributado";
+  o.key = o.tfam ? "T|" + o.tfam : o.cProd + "|" + o.ncm;
+  o.base = { classe: o.classe, status: o.status, conf: o.conf, fonte: o.fonte, peneira: o.peneira, regra: o.regra };
+  return o;
+});
+
+const TRIBF = Object.fromEntries(((D.tribunal || {}).familias || []).map(f => [f.familia, f]));
+// ---------- simulação: as mesmas regras do gerar_painel.py ----------
+function simular(o, classe) {
+  const f = FATOR[classe] ?? 1, v = o.vProd, ic = o.vICMS, exp = String(o.cfop).startsWith("7"), bon = o.cfop === "5910";
+  const incide = o.trib && !exp && !bon, base = v - ic;
+  const pis = incide ? r2(base * 0.0165) : 0, cof = incide ? r2(base * 0.076) : 0;
+  const cbs27 = r2(v * 0.087 * f), ibs27 = r2(v * 0.001 * f), cbs33 = r2(v * 0.088 * f), ibs33 = r2(v * 0.177 * f);
+  const s = { f, pis, cofins: cof, cbs27, ibs27, cbs33, ibs33, hoje: r2(ic + pis + cof), "2027": r2(ic + cbs27 + ibs27), "2033": r2(cbs33 + ibs33), cred_hoje: null, cred_2027: null, cred_2033: null };
+  if (!o.venda) {
+    const rev = o.fin === "revenda";
+    s.cred_hoje = r2((rev ? ic : 0) + ((rev && o.trib) ? pis + cof : 0));
+    s.cred_2027 = r2((rev ? ic : 0) + cbs27 + ibs27);
+    s.cred_2033 = r2(cbs33 + ibs33);
+  }
+  return s;
+}
+
+// ---------- estado do usuário ----------
+let decisoes = store.get("decisoes", {});
+let contest = store.get("contestacoes", {});
+let premSt = store.get("premissas", {});
+let acoesSt = store.get("acoes", {});
+let log = store.get("log", []);
+function registrar(acao, detalhe, extra) {
+  log.unshift({ quando: new Date().toISOString(), perfil: PERSONAS[persona].nome, acao, detalhe, ...(extra || {}) });
+  log = log.slice(0, 300); store.set("log", log);
+}
+function toast(msg) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 4000);
+}
+function aplicar() {
+  for (const o of items) {
+    const b = o.base, dec = decisoes[o.key];
+    if (dec && b.peneira !== 1) {
+      o.classe = dec.classe; o.status = "CLASSIFICADO"; o.conf = 1; o.peneira = 6; o.regra = "revisao_humana";
+      o.fonte = `Revisão humana (${dec.perfil}, ${quando(dec.quando)}): ${dec.justificativa}`;
+    } else Object.assign(o, b);
+    Object.assign(o, simular(o, o.classe));
+  }
+}
+aplicar();
+
+// ---------- agregações ----------
+const state = { uso: true, ponte: "2033", aliq: 26.5, item: null, pcen: "2033", pprod: null, minhas: false };
+const conta = o => o.venda || state.uso || o.fin === "revenda";
+function resumo(all) {
+  const r = { hoje: { d: 0, c: 0 }, "2027": { d: 0, c: 0 }, "2033": { d: 0, c: 0 } }; let nv = 0, nc = 0;
+  for (const o of items) {
+    if (!all && !conta(o)) continue;
+    if (o.venda) { nv++; r.hoje.d += o.hoje; r["2027"].d += o["2027"]; r["2033"].d += o["2033"]; }
+    else { nc++; r.hoje.c += o.cred_hoje; r["2027"].c += o.cred_2027; r["2033"].c += o.cred_2033; }
+  }
+  for (const k of ["hoje", "2027", "2033"]) { r[k].d = r2(r[k].d); r[k].c = r2(r[k].c); r[k].l = r2(r[k].d - r[k].c); }
+  r.nv = nv; r.nc = nc; return r;
+}
+function ponte(cen) {
+  let pcV = 0, icmsV = 0, novoV = 0, credPC = 0, credICMS = 0, credNovo = 0; const s = cen === "2033" ? "33" : "27";
+  for (const o of items) {
+    if (!conta(o)) continue;
+    if (o.venda) { pcV += o.pis + o.cofins; icmsV += o.vICMS; novoV += o["cbs" + s] + o["ibs" + s]; }
+    else { const ci = o.fin === "revenda" ? o.vICMS : 0; credICMS += ci; credPC += o.cred_hoje - ci; credNovo += o["cbs" + s] + o["ibs" + s]; }
+  }
+  const p = [{ k: "PIS/Cofins das vendas acaba", v: -pcV }];
+  if (cen === "2033") p.push({ k: "ICMS das vendas acaba", v: -icmsV });
+  p.push({ k: "CBS/IBS nas vendas", v: novoV }, { k: "Fim do crédito de PIS/Cofins", v: credPC });
+  if (cen === "2033") p.push({ k: "Fim do crédito de ICMS", v: credICMS });
+  p.push({ k: "Crédito de CBS/IBS nas compras", v: -credNovo });
+  return p;
+}
+function transicao(aliq, all) {
+  const k = aliq / 26.5; let SvI = 0, SvB = 0, ScI = 0, ScB = 0;
+  for (const o of items) {
+    if (!all && !conta(o)) continue;
+    if (o.venda) { SvI += o.vICMS; SvB += o.vProd * o.f; } else { ScI += o.fin === "revenda" ? o.vICMS : 0; ScB += o.vProd * o.f; }
+  }
+  const R = resumo(all), frac = y => y <= 2028 ? 1 : (D.transicao[String(y)] ?? 0), pts = [{ ano: "2026", l: R.hoje.l }];
+  for (let y = 2027; y <= 2033; y++) {
+    const f = frac(y), cbs = (y <= 2028 ? 8.7 : 8.8) * k, ibs = y <= 2028 ? 0.1 : 17.7 * k * (1 - f);
+    const d = f * SvI + SvB * (cbs + ibs) / 100, c = f * ScI + ScB * (cbs + ibs) / 100;
+    pts.push({ ano: String(y), l: d - c, d, c });
+  }
+  return pts;
+}
+function produtos() {
+  const m = {}, Z = () => ({ hoje: 0, "2027": 0, "2033": 0 });
+  for (const o of items) {
+    const p = m[o.cProd] || (m[o.cProd] = { cProd: o.cProd, desc: o.desc.replace(/\s*-\s*BONIFICACAO$/, ""), ncm: o.ncm, n: 0, vv: 0, deb: Z(), cre: Z(), cls: {}, qv: 0, vv5: 0, iv: Z(), qc: 0, vc: 0, cr: Z() });
+    p.n++; p.cls[o.classe] = (p.cls[o.classe] || 0) + 1;
+    if (o.venda) {
+      p.vv += o.vProd; for (const c of ["hoje", "2027", "2033"]) p.deb[c] += o[c];
+      if (o.cfop === "5102") { p.qv += o.quant; p.vv5 += o.vProd; for (const c of ["hoje", "2027", "2033"]) p.iv[c] += o[c]; }
+    } else {
+      for (const c of ["hoje", "2027", "2033"]) p.cre[c] += o["cred_" + c];
+      if (o.fin === "revenda") { p.qc += o.quant; p.vc += o.vProd; for (const c of ["hoje", "2027", "2033"]) p.cr[c] += o["cred_" + c]; }
+    }
+  }
+  return Object.values(m).map(p => {
+    p.classe = Object.entries(p.cls).sort((a, b) => b[1] - a[1])[0][0];
+    p.ef = {}; for (const c of ["hoje", "2027", "2033"]) p.ef[c] = p.vv ? 100 * p.deb[c] / p.vv : null;
+    p.imp = {}; for (const c of ["2027", "2033"]) p.imp[c] = (p.deb[c] - p.deb.hoje) - (p.cre[c] - p.cre.hoje);
+    p.preco = {};
+    if (p.qv > 0 && p.qc > 0 && p.vv5 > 0) {
+      const pv = p.vv5 / p.qv, iv0 = p.iv.hoje / p.qv, custo = p.vc / p.qc, cr0 = p.cr.hoje / p.qc;
+      for (const c of ["2027", "2033"]) {
+        const ef = p.iv[c] / p.vv5, crN = p.cr[c] / p.qc, novo = (pv - iv0 + cr0 - crN) / (1 - ef);
+        p.preco[c] = { pv, iv0, custo, cr0, crN, ef, ef0: p.iv.hoje / p.vv5, novo, delta: 100 * (novo / pv - 1), margem: pv - iv0 - (custo - cr0) };
+      }
+    }
+    return p;
+  });
+}
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function showTip(e, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight; let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 14; if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach(el => {
+    el.addEventListener("pointermove", e => showTip(e, el.getAttribute("data-tip")));
+    el.addEventListener("pointerleave", hideTip);
+    el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); showTip({ clientX: r.right, clientY: r.top }, el.getAttribute("data-tip")); });
+    el.addEventListener("blur", hideTip);
+  });
+}
+
+// ---------- gráficos ----------
+function niceScale(min, max, n = 5) {
+  const span = max - min || 1, mag = Math.pow(10, Math.floor(Math.log10(span / n)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+  return { lo: Math.floor(min / step) * step, hi: Math.ceil(max / step) * step, step };
+}
+function drawPonte() {
+  const el = document.getElementById("ch-ponte"), R = resumo(), cen = state.ponte, steps = ponte(cen);
+  const bars = [{ k: "Imposto líquido hoje", v: R.hoje.l, total: true }]; let acc = R.hoje.l;
+  for (const s of steps) { bars.push({ k: s.k, v: s.v, from: acc, to: acc + s.v }); acc += s.v; }
+  bars.push({ k: "Imposto líquido " + cen, v: R[cen].l, total: true });
+  const vals = bars.flatMap(b => b.total ? [0, b.v] : [b.from, b.to]), sc = niceScale(Math.min(0, ...vals), Math.max(0, ...vals), 4);
+  const W = Math.max(520, el.clientWidth || 520), lab = Math.min(190, W * 0.34), valW = 92, rh = 34, T = 8, H = T + bars.length * rh + 26;
+  const x0 = lab + 8, x1 = W - valW - 8, x = v => x0 + (v - sc.lo) / (sc.hi - sc.lo) * (x1 - x0);
+  let g = "";
+  for (let t = sc.lo; t <= sc.hi + 1e-6; t += sc.step) g += `<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - 22}"/><text x="${x(t)}" y="${H - 6}" text-anchor="middle">${brlC(t).replace("R$ ", "")}</text>`;
+  g += `<line class="axis" x1="${x(0)}" x2="${x(0)}" y1="${T}" y2="${H - 22}" stroke-width="1.5"/>`;
+  bars.forEach((b, i) => {
+    const y = T + i * rh, a = b.total ? Math.min(0, b.v) : Math.min(b.from, b.to), z = b.total ? Math.max(0, b.v) : Math.max(b.from, b.to);
+    const fill = b.total ? "var(--brand)" : b.v >= 0 ? "var(--up)" : "var(--down)";
+    const t = b.total ? `<b>${esc(b.k)}</b><br>${brl(b.v)}` : `<b>${esc(b.k)}</b><br>${b.v >= 0 ? "Aumenta" : "Reduz"} o imposto líquido em ${brl(Math.abs(b.v))}`;
+    g += `<text x="${lab}" y="${y + 21}" text-anchor="end" style="${b.total ? "fill:var(--ink);font-weight:600" : ""}">${esc(b.k)}</text>`;
+    g += `<rect x="${x(a)}" y="${y + 7}" width="${Math.max(3, x(z) - x(a))}" height="${rh - 14}" rx="3" fill="${fill}" tabindex="0" data-tip="${esc(t)}"/>`;
+    if (i < bars.length - 1) { const nx = b.total ? b.v : b.to; g += `<line x1="${x(nx)}" x2="${x(nx)}" y1="${y + rh - 7}" y2="${y + rh + 7}" stroke="var(--faint)" stroke-dasharray="2 2"/>`; }
+    g += `<text class="val" x="${W - 4}" y="${y + 21}" text-anchor="end">${b.total ? brlC(b.v) : signC(b.v)}</text>`;
+  });
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ponte do imposto líquido de hoje até ${cen}">${g}</svg>`; bindTips(el);
+}
+function drawTrans() {
+  const el = document.getElementById("ch-trans"), pts = transicao(state.aliq);
+  const sc = niceScale(Math.min(0, ...pts.map(p => p.l)), Math.max(0, ...pts.map(p => p.l)));
+  const W = Math.max(440, el.clientWidth || 440), H = 270, L = 66, Rm = 16, T = 18, B = 32;
+  const x = i => L + i * (W - L - Rm) / (pts.length - 1), y = v => T + (sc.hi - v) / (sc.hi - sc.lo) * (H - T - B);
+  let g = "";
+  for (let t = sc.lo; t <= sc.hi + 1e-6; t += sc.step) g += `<line class="grid" x1="${L}" x2="${W - Rm}" y1="${y(t)}" y2="${y(t)}"/><text x="${L - 8}" y="${y(t) + 4}" text-anchor="end">${brlC(t).replace("R$ ", "")}</text>`;
+  g += `<line class="axis" x1="${L}" x2="${W - Rm}" y1="${y(0)}" y2="${y(0)}" stroke-width="1.5"/>`;
+  g += `<path d="M${x(0)},${y(0)} ${pts.map((p, i) => `L${x(i)},${y(p.l)}`).join(" ")} L${x(pts.length - 1)},${y(0)} Z" fill="var(--brand)" opacity="0.08"/>`;
+  g += `<path d="${pts.map((p, i) => (i ? "L" : "M") + x(i) + "," + y(p.l)).join(" ")}" fill="none" stroke="var(--brand)" stroke-width="2"/>`;
+  pts.forEach((p, i) => {
+    const t = `<b>${p.ano === "2026" ? "Hoje" : p.ano}</b><br>Imposto líquido ${brl(p.l)}` + (p.d != null ? `<br>Débitos ${brlC(p.d)} · créditos ${brlC(p.c)}` : "<br>Valor exato da simulação");
+    g += `<circle cx="${x(i)}" cy="${y(p.l)}" r="${i === 0 || i === pts.length - 1 ? 5 : 3.5}" fill="var(--surface)" stroke="var(--brand)" stroke-width="2"/>`;
+    g += `<rect x="${x(i) - 18}" y="${T}" width="36" height="${H - T - B}" fill="transparent" tabindex="0" data-tip="${esc(t)}"/>`;
+    g += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle">${p.ano === "2026" ? "hoje" : p.ano}</text>`;
+  });
+  const last = pts[pts.length - 1];
+  g += `<text class="val" x="${x(pts.length - 1) - 10}" y="${y(last.l) + 4}" text-anchor="end">${brlC(last.l)}</text>`;
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Imposto líquido estimado de 2026 a 2033">${g}</svg>`; bindTips(el);
+  document.getElementById("trans-note").textContent = `Estimativa sem arredondamento por item. CBS ${nf1.format(8.7 * state.aliq / 26.5)}% em 2027–28 e ${nf1.format(8.8 * state.aliq / 26.5)}% depois; o IBS cresce na proporção em que o ICMS cai (frações do parametros.json).`;
+}
+function divBars(el, rows, fmt, tipFn, onClick) {
+  if (!rows.length) { el.innerHTML = `<p class="empty">Nada a mostrar.</p>`; return; }
+  const max = Math.max(...rows.map(r => Math.abs(r.v)), 1e-9);
+  const W = Math.max(560, el.clientWidth || 560), rh = 24, H = rows.length * rh + 10, lab = Math.min(260, W * 0.36), mid = lab + (W - lab - 90) / 2, half = (W - lab - 90) / 2;
+  let g = `<line class="axis" x1="${mid}" x2="${mid}" y1="0" y2="${H}"/>`;
+  rows.forEach((r, i) => {
+    const yy = 5 + i * rh, w = Math.max(2, Math.abs(r.v) / max * half), up = r.v > 0;
+    g += `<text x="${lab - 8}" y="${yy + 15}" text-anchor="end">${esc(r.k.length > 34 ? r.k.slice(0, 33) + "…" : r.k)}</text>`;
+    g += `<rect x="${up ? mid : mid - w}" y="${yy + 4}" width="${w}" height="${rh - 8}" rx="3" fill="${up ? "var(--up)" : "var(--down)"}" tabindex="0" data-tip="${esc(tipFn(r))}" data-k="${esc(r.id || "")}" style="cursor:${onClick ? "pointer" : "default"}"/>`;
+    g += `<text class="val" x="${up ? mid + w + 6 : mid + 6}" y="${yy + 15}">${fmt(r.v)}</text>`;
+  });
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Barras por produto">${g}</svg>`; bindTips(el);
+  if (onClick) el.querySelectorAll("rect[data-k]").forEach(r => { r.addEventListener("click", () => onClick(r.dataset.k)); r.addEventListener("keydown", e => { if (e.key === "Enter") onClick(r.dataset.k); }); });
+}
+
+// ---------- fila de revisão ----------
+function grupos() {
+  const g = {};
+  for (const o of items) {
+    if (o.base.peneira === 1) continue;
+    const pend = o.base.status === "REVISAR" || contest[o.key] || o.tfam;
+    if (!pend && !decisoes[o.key]) continue;
+    const tf = o.tfam ? TRIBF[o.tfam] : null;
+    const x = g[o.key] || (g[o.key] = { key: o.key, cProd: o.cProd, ncm: o.ncm, desc: tf ? tf.descricao : o.desc.replace(/\s*-\s*BONIFICACAO$/, ""), its: [], valor: 0, motivo: tf ? tf.justificativa : o.base.fonte, classe0: o.base.classe, contest: contest[o.key], dec: decisoes[o.key], trib: tf, classeMapa: tf ? tf.classe_mapa : null });
+    x.its.push(o); x.valor += o.vProd;
+  }
+  return Object.values(g);
+}
+const pendentes = () => grupos().filter(g => !g.dec);
+
+// ---------- decisão na tela: opções, simulador e registro ----------
+state.grupo = null;
+const CEN = ["hoje", "2027", "2033"];
+// Imposto e crédito de um grupo sob uma classe, pelas mesmas regras de simular().
+function gcen(its, classe) {
+  const d = { hoje: 0, "2027": 0, "2033": 0 }, c = { hoje: 0, "2027": 0, "2033": 0 }, l = {};
+  for (const o of its) {
+    const s = simular(o, classe);
+    for (const k of CEN) { if (o.venda) d[k] += s[k]; else c[k] += s["cred_" + k]; }
+  }
+  for (const k of CEN) { d[k] = r2(d[k]); c[k] = r2(c[k]); l[k] = r2(d[k] - c[k]); }
+  return { d, c, l };
+}
+// Classes que a lei permite para o NCM, com a sugestão do motor em primeiro e o efeito no lote contra ela.
+function opcoes(gp) {
+  const lin = (D.mapa[gp.ncm] || []).filter(l => l.permissao.toUpperCase() === "PERMITIDO" && FATOR[l.classe] != null && !["200005", "410001", "410004"].includes(l.classe));
+  const set = new Map(); lin.forEach(l => { if (!set.has(l.classe)) set.set(l.classe, l); });
+  if (!set.has("000001")) set.set("000001", null);
+  if (!set.has(gp.classe0)) set.set(gp.classe0, null);
+  if (gp.classeMapa && !set.has(gp.classeMapa)) set.set(gp.classeMapa, null);
+  const base = gcen(gp.its, gp.classe0).l["2033"];
+  return [...set.entries()]
+    .sort((a, b) => (b[0] === gp.classe0) - (a[0] === gp.classe0))
+    .map(([classe, l]) => ({ classe, l, efeito: gcen(gp.its, classe).l["2033"] - base }));
+}
+const filaOrdenada = () => pendentes().sort((a, b) => b.valor - a.valor);
+const vcls = v => v > 0.005 ? "up" : v < -0.005 ? "down" : "";
+const plural = n => n === 1 ? "" : "s";
+
+function renderDecisoes() {
+  const pend = filaOrdenada(), done = grupos().filter(g => g.dec), all = [...pend, ...done];
+  if (!state.grupo || !all.find(g => g.key === state.grupo)) state.grupo = all.length ? all[0].key : null;
+  const item = g => `<li><button type="button" data-g="${esc(g.key)}" aria-current="${g.key === state.grupo}">
+      <span class="t">${esc(g.desc)}</span>
+      <span class="s num">NCM ${esc(g.ncm)} · ${nf0.format(g.its.length)} itens · ${brlC(g.valor)}</span>
+      ${g.dec ? `<span class="tag" style="color:var(--ok)">Decidido: ${esc(g.dec.classe)}</span>` : `<span class="tag" style="color:var(--warn)">${g.contest ? "Contestado" : g.trib ? "Tribunal de premissas" : "Confiança baixa"}</span>`}</button></li>`;
+  document.getElementById("dec-list").innerHTML = `<div class="panel" style="padding:12px">
+      <div class="panel-head" style="margin-bottom:6px"><div><h3>Aguardando decisão · ${pend.length}</h3><p>Maior valor primeiro.</p></div></div>
+      ${pend.length ? `<ul class="results" style="max-height:none;margin-top:0">${pend.map(item).join("")}</ul>` : `<p class="empty">Fila vazia. Nada a decidir.</p>`}
+      ${done.length ? `<div class="panel-head" style="margin:14px 0 6px"><div><h3>Decididos · ${done.length}</h3></div></div><ul class="results" style="max-height:none;margin-top:0">${done.map(item).join("")}</ul>` : ""}
+    </div>`;
+  document.querySelectorAll("#dec-list [data-g]").forEach(b => b.addEventListener("click", () => { state.grupo = b.dataset.g; renderDecisoes(); }));
+
+  const box = document.getElementById("dec-detail"), gp = all.find(g => g.key === state.grupo);
+  if (!gp) { box.innerHTML = `<div class="panel"><p class="empty">Nenhum grupo em revisão. Todos os itens têm classe decidida.</p></div>`; return; }
+  if (gp.dec) { box.innerHTML = detalheDecidido(gp); const rb = document.getElementById("dec-reabrir"); if (rb) rb.addEventListener("click", () => desfazer(gp.key)); }
+  else { box.innerHTML = detalhePendente(gp); bindPendente(gp); }
+  box.querySelectorAll("[data-evid]").forEach(b => b.addEventListener("click", () => openEvid(+b.dataset.evid)));
+}
+
+function detalhePendente(gp) {
+  const ops = opcoes(gp), lin = D.mapa[gp.ncm] || [];
+  const motivo = gp.contest ? `Contestado por ${gp.contest.perfil} em ${quando(gp.contest.quando)}: ${gp.contest.motivo}` : gp.motivo;
+  const amostra = gp.its.slice(0, 3).map(o => `<tr><td class="mono">…${esc(o.chave.slice(-8))} · item ${o.nItem}</td><td>${o.venda ? "Venda" : "Compra"}</td><td class="r num">${brl(o.vProd)}</td><td><button class="btn small" type="button" data-evid="${o.i}">Ver evidências</button></td></tr>`).join("");
+  return `
+    <div class="panel">
+      <div class="panel-head"><div><h3>${esc(gp.desc)}</h3><p>NCM <span class="mono">${esc(gp.ncm)}</span> · ${nf0.format(gp.its.length)} itens · ${brlC(gp.valor)} em notas</p></div><span class="chip warn">${gp.contest ? "Contestado" : gp.trib ? "Tribunal de premissas" : "Confiança baixa"}</span></div>
+      ${gp.trib ? `<div class="fields" style="margin-bottom:12px">
+        <div class="field"><div class="k">Mapa estrito</div><div class="v mono">${esc(gp.trib.classe_mapa)}</div><div class="src">${esc(CLASSES[gp.trib.classe_mapa] || "")}</div></div>
+        <div class="field"><div class="k">Leitura técnica adotada</div><div class="v mono">${esc(gp.trib.classe)}</div><div class="src">${esc(CLASSES[gp.trib.classe] || "")}</div></div>
+        <div class="field"><div class="k">Referência legal</div><div class="v">${esc(gp.trib.referencia_legal)}</div><div class="src">${nf0.format(gp.trib.itens)} itens no lote do pipeline</div></div></div>` : ""}
+      <p><b>Por que está aqui:</b> ${esc(motivo)}</p>
+      <p class="note">${gp.trib ? "Classe da leitura técnica" : "Classe sugerida pelo motor"}: <span class="mono">${esc(gp.classe0)}</span> · ${esc(CLASSES[gp.classe0] || "")}</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Evidências</h3><p>Linhas do mapa da lei para este NCM e três itens do grupo.</p></div></div>
+      ${lin.length ? `<div class="table-wrap" style="margin-bottom:14px"><table><thead><tr><th>Classe</th><th>Permissão</th><th>Condição</th><th>Texto do anexo</th></tr></thead><tbody>${lin.map(l => `<tr class="${l.classe === gp.classe0 ? "hit" : ""}"><td class="mono">${esc(l.classe)}</td><td>${esc(l.permissao)}</td><td>${esc(l.condicao)}</td><td style="max-width:360px">${esc(l.item.length > 160 ? l.item.slice(0, 158) + "…" : l.item)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note" style="margin:0 0 12px">Este NCM não tem linha no mapa: a regra padrão se aplica.</p>`}
+      <div class="table-wrap"><table><thead><tr><th>Nota e item</th><th>Operação</th><th class="r">Valor</th><th></th></tr></thead><tbody>${amostra}</tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Escolha a classe</h3><p>O efeito é no imposto líquido de 2033 do lote, contra a sugestão do motor.</p></div></div>
+      <div class="opts" role="radiogroup" aria-label="Classe para o grupo">${ops.map(op => `<label class="opt ${op.classe === gp.classe0 ? "cur" : ""}">
+          <input type="radio" name="op" value="${esc(op.classe)}" ${op.classe === gp.classe0 ? "checked" : ""}>
+          <span><span class="t"><span class="mono">${esc(op.classe)}</span> · ${esc(CLASSES[op.classe] || "")}</span>${op.classe === gp.classe0 ? ` <span class="chip plain">${gp.trib ? "leitura técnica adotada" : "sugestão do motor"}</span>` : ""}${gp.classeMapa && op.classe === gp.classeMapa ? ` <span class="chip plain">mapa estrito</span>` : ""}
+            <span class="d" style="display:block">${op.l ? esc(op.l.item.length > 200 ? op.l.item.slice(0, 198) + "…" : op.l.item) : "Sem benefício: alíquota cheia."}</span></span>
+          <span class="imp">No lote, 2033<b class="${vcls(op.efeito)}">${op.classe === gp.classe0 ? "—" : signC(op.efeito)}</b></span></label>`).join("")}</div>
+    </div>
+    <div class="panel" id="dec-sim"></div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Confirmar</h3><p>A justificativa vai para a fonte de cada item e para a auditoria.</p></div></div>
+      <div style="display:grid;gap:12px">
+        <label style="display:grid;gap:6px"><span style="font-size:13px;color:var(--muted)">Justificativa (mínimo de 5 caracteres)</span>
+          <textarea data-just placeholder="Ex.: bisnaguinha é pão de leite, não o pão francês descrito no Anexo I"></textarea></label>
+        <label class="switch"><input type="checkbox" id="dec-enc"> Encaminhar para validação do controller (cria uma ação no plano)</label>
+        <div class="row"><button class="btn primary" type="button" id="dec-ok" disabled>Confirmar decisão</button><span class="note" style="margin:0">Aplica a classe aos ${nf0.format(gp.its.length)} itens e recalcula o painel.</span></div>
+      </div>
+    </div>`;
+}
+
+function paintSim(gp, classe) {
+  const el = document.getElementById("dec-sim"); if (!el) return;
+  const A = gcen(gp.its, classe), S = gcen(gp.its, gp.classe0), R = resumo(true), dl = A.l["2033"] - S.l["2033"], igual = classe === gp.classe0;
+  const linha = (k, nome) => `<tr><td class="lbl">${nome}</td><td class="r num">${brlC(A.d[k])}</td><td class="r num">${brlC(A.c[k])}</td><td class="r num"><b>${brlC(A.l[k])}</b></td><td class="r num ${vcls(A.l[k] - S.l[k])}">${igual ? "—" : signC(A.l[k] - S.l[k])}</td></tr>`;
+  el.innerHTML = `<div class="panel-head"><div><h3>Simulador</h3><p>Efeito desta classe no grupo, antes de confirmar.</p></div></div>
+    <div class="table-wrap"><table class="calc"><thead><tr><th>Grupo</th><th class="r">Débitos</th><th class="r">Créditos</th><th class="r">Líquido</th><th class="r">Contra a sugestão</th></tr></thead>
+    <tbody>${linha("hoje", "Hoje")}${linha("2027", "2027")}${linha("2033", "2033")}</tbody></table></div>
+    <p class="note">${igual ? "Esta é a sugestão do motor: nenhuma mudança no lote." : `No lote, o imposto líquido de 2033 vai de <b>${brlC(R["2033"].l)}</b> para <b>${brlC(R["2033"].l + dl)}</b> (${signC(dl)}).`}</p>`;
+}
+
+function bindPendente(gp) {
+  const box = document.getElementById("dec-detail");
+  const paint = () => {
+    const sel = box.querySelector("input[name=op]:checked");
+    paintSim(gp, sel.value);
+    box.querySelectorAll(".opt").forEach(l => l.classList.toggle("cur", l.querySelector("input").checked));
+  };
+  box.querySelectorAll("input[name=op]").forEach(r => r.addEventListener("change", paint));
+  paint();
+  const ta = box.querySelector("[data-just]"), bt = document.getElementById("dec-ok"), enc = document.getElementById("dec-enc");
+  ta.addEventListener("input", () => { bt.disabled = ta.value.trim().length < 5; });
+  bt.addEventListener("click", () => decidir(gp, box.querySelector("input[name=op]:checked").value, ta.value.trim(), enc.checked));
+}
+
+function detalheDecidido(gp) {
+  const d = gp.dec, hist = log.filter(e => e.key === gp.key).slice(0, 8);
+  const lista = hist.length ? `<ul class="tasks">${hist.map(e => `<li class="task"><div><b>${esc(e.acao)}</b><span class="d">${quando(e.quando)} · ${esc(e.perfil)}${e.detalhe ? " · " + esc(e.detalhe) : ""}</span></div></li>`).join("")}</ul>` : `<p class="empty">Sem registros.</p>`;
+  return `
+    <div class="panel">
+      <div class="panel-head"><div><h3>${esc(gp.desc)}</h3><p>NCM <span class="mono">${esc(gp.ncm)}</span> · ${nf0.format(gp.its.length)} itens</p></div><span class="chip ok">Decidido</span></div>
+      <div class="fields">
+        <div class="field"><div class="k">Antes</div><div class="v mono">${esc(d.de)}</div><div class="src">sugestão do motor</div></div>
+        <div class="field"><div class="k">Agora</div><div class="v mono">${esc(d.classe)}</div><div class="src">${esc(CLASSES[d.classe] || "")}</div></div>
+        <div class="field"><div class="k">Quem decidiu</div><div class="v">${esc(d.perfil)}</div><div class="src">${quando(d.quando)}</div></div>
+      </div>
+      <p style="margin-top:14px"><b>Justificativa:</b> ${esc(d.justificativa)}</p>
+      <div class="row" style="margin-top:14px"><button class="btn" type="button" id="dec-reabrir">Reabrir o grupo</button><span class="note" style="margin:0">Volta à fila e restaura a sugestão do motor nos itens.</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Histórico deste grupo</h3><p>Registros de decisão, contestação e reabertura.</p></div><button class="btn small" type="button" data-go="auditoria">Auditoria completa</button></div>
+      ${lista}
+    </div>`;
+}
+
+// Uma decisão reclassifica o grupo inteiro, registra a justificativa e, se pedido, cria a ação de validação.
+function decidir(gp, classe, justificativa, encaminhar) {
+  decisoes[gp.key] = { classe, justificativa, perfil: PERSONAS[persona].nome, quando: new Date().toISOString(), de: gp.classe0, n: gp.its.length, desc: gp.desc };
+  delete contest[gp.key]; store.set("decisoes", decisoes); store.set("contestacoes", contest);
+  registrar("Decisão de revisão", `${gp.desc}: ${gp.classe0} → ${classe} em ${gp.its.length} itens. ${justificativa}`, { key: gp.key, classe });
+  if (encaminhar) addAcao({ t: `Validar a classe ${classe} de ${gp.desc}`, d: `Decidido por ${PERSONAS[persona].nome}. Conferir a justificativa antes da entrega.`, imp: `${nf0.format(gp.its.length)} itens`, prazo: "Antes da entrega", dono: "controller", origem: `Decisão: ${gp.desc}` });
+  aplicar();
+  const prox = filaOrdenada()[0];
+  state.grupo = prox ? prox.key : gp.key;
+  route();
+  toast(`${nf0.format(gp.its.length)} itens de ${gp.desc} agora são ${classe}. Simulação recalculada.`);
+}
+function desfazer(key) {
+  const d = decisoes[key]; if (!d) return;
+  delete decisoes[key]; store.set("decisoes", decisoes);
+  registrar("Decisão reaberta", `${d.desc}: volta para ${d.de}; ${d.n} itens de volta à fila`, { key });
+  state.grupo = key; aplicar(); route(); toast(`${d.desc} voltou para a fila de revisão.`);
+}
+// Navegação interna: a página e, opcionalmente, o grupo a abrir.
+function go(page, grupo) {
+  if (document.getElementById("evid").open) document.getElementById("evid").close();
+  if (grupo) state.grupo = grupo;
+  if (location.hash === "#" + page) route(); else location.hash = "#" + page;
+}
+
+// ---------- evidências: um item, aberto em diálogo a partir de qualquer tela ----------
+function itemHTML(o) {
+  const fld = (k, v, src) => `<div class="field"><div class="k">${k}</div><div class="v">${v}</div><div class="src">${src}</div></div>`;
+  const nome = c => (EMP[c] && EMP[c].razao_social) || (c ? fmtCnpj(c) : "Exterior");
+  const grupoN = items.filter(x => x.key === o.key && x.base.peneira !== 1).length;
+  const nota = `<div class="panel">
+    <div class="panel-head"><div><h3>1 · Da nota fiscal</h3><p>${o.venda ? "Venda: a Meridional é a emitente" : "Compra: a Meridional é a destinatária"}. Campos lidos da DANFE.</p></div><a href="../../../pacote-times/dados/danfe/${esc(o.chave)}.pdf" target="_blank" rel="noopener">Abrir a DANFE</a></div>
+    <div class="fields">
+      ${fld("Chave de acesso", `<span class="mono" style="font-size:12px">${esc(o.chave)}</span>`, "Topo da DANFE")}
+      ${fld("Item", o.nItem, "Posição na tabela de produtos")}
+      ${fld("Emitente", esc(nome(o.emit)), "CNPJ " + fmtCnpj(o.emit))}
+      ${fld("Destinatário", esc(nome(o.dest)), o.dest ? "CNPJ " + fmtCnpj(o.dest) : "Importador no exterior")}
+      ${fld("Produto", `${esc(o.desc)}<br><span class="mono" style="font-size:12px">${esc(o.cProd)}</span>`, "Colunas CÓDIGO e DESCRIÇÃO")}
+      ${fld("NCM", `<span class="mono">${esc(o.ncm)}</span>`, "Coluna NCM/SH")}
+      ${fld("CFOP", `<span class="mono">${esc(o.cfop)}</span>`, "Coluna CFOP")}
+      ${fld("Valor do item (vProd)", `<span class="num">${brl(o.vProd)}</span>`, "Coluna VALOR TOTAL")}
+      ${fld("ICMS destacado", `<span class="num">${brl(o.vICMS_doc ?? o.vICMS)}</span>`, o.vICMS_doc != null && o.vICMS_doc !== o.vICMS ? "Coluna VALOR ICMS; zerado no cálculo (exportação)" : "Coluna VALOR ICMS")}${o.fam ? fld("Família no pipeline", esc(o.fam), o.tfam ? "Em divergência: tribunal de premissas" : "Catálogo e mapa do pipeline") : ""}
+      ${fld(o.venda ? "Tipo de cliente" : "Finalidade da compra", esc(o.venda ? (o.tipo || "—") : (o.fin || "—")), "cadastro_empresas")}
+    </div></div>`;
+  const lin = D.mapa[o.ncm] || [];
+  const st = o.status === "REVISAR" ? `<span class="chip warn">REVISAR</span>` : `<span class="chip ok">CLASSIFICADO</span>`;
+  const contestar = o.base.peneira === 1 ? "" : contest[o.key]
+    ? `<p class="note">Este grupo está na fila de revisão desde ${quando(contest[o.key].quando)}. <a href="#decisoes" data-fila="1">Abrir a fila</a></p>`
+    : `<details><summary style="cursor:pointer;font-weight:500">Contestar esta classificação</summary>
+        <div style="display:grid;gap:8px;margin-top:10px"><textarea id="ct-motivo" placeholder="Por que a classe está errada? Ex.: o anexo exige o produto in natura"></textarea>
+        <div class="row"><button class="btn" type="button" id="ct-enviar" disabled>Enviar os ${nf0.format(grupoN)} itens do grupo para a fila</button></div></div></details>`;
+  const malha = `<div class="panel">
+    <div class="panel-head"><div><h3>2 · Malha de decisão</h3><p>Caminho do item pelas peneiras.</p></div>
+      <div class="row" style="gap:6px"><span class="chip mono" style="font-size:13px">${esc(o.classe)}</span>${st}<span class="chip plain num">confiança ${nf2.format(o.conf)}</span>${o.is_sel ? `<span class="chip up">Imposto Seletivo</span>` : ""}</div></div>
+    <p style="margin-bottom:14px"><b>${esc(CLASSES[o.classe] || o.classe)}.</b> ${esc(o.fonte)}</p>
+    <ol class="sieve">${caminho(o).map(s => { const pn = PEN[s.id], why = s.st === "reteve" ? esc(o.fonte) : s.st === "passou" ? esc(s.why || "") : "Não avaliada: uma peneira anterior já decidiu.";
+      return `<li class="${s.st}"><span class="dot">${s.id}</span><div class="body"><span class="state">${s.st === "reteve" ? "Reteve o item" : s.st === "passou" ? "Passou" : "Não avaliada"}</span><span class="q">${esc(pn.nome)} · ${esc(pn.pergunta)}</span><span class="why">${why}</span></div></li>`; }).join("")}</ol>
+    ${lin.length ? `<h3 style="margin:8px 0;font-size:13px">Linhas do mapa para o NCM ${esc(o.ncm)} <span style="color:var(--muted);font-weight:400">(mapa_ncm_cclasstrib, vigentes)</span></h3>
+    <div class="table-wrap"><table><thead><tr><th>Classe</th><th>Permissão</th><th>Condição</th><th>Item do anexo</th></tr></thead><tbody>${lin.map(l => `<tr class="${l.classe === o.classe && (o.peneira === 2 || o.peneira === 6) ? "hit" : ""}"><td class="mono">${esc(l.classe)}</td><td>${esc(l.permissao)}</td><td>${esc(l.condicao)}</td><td style="max-width:420px">${esc(l.item.length > 180 ? l.item.slice(0, 178) + "…" : l.item)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <div style="margin-top:14px">${contestar}</div></div>`;
+  const f = o.f, fTxt = f === 1 ? "sem redução" : f === 0 ? "redução de 100%" : "redução de 60% (fator 0,4)", base = o.vProd - o.vICMS;
+  const pisWhy = String(o.cfop).startsWith("7") ? "zero na exportação (enunciado)" : o.cfop === "5910" ? "zero na bonificação (como na DANFE)" : !o.trib ? "zero: produto com alíquota zero ou monofásico hoje" : `(${brl(o.vProd)} − ${brl(o.vICMS)}) × 1,65%, base ${brl(base)}`;
+  const row = (l, v, w) => `<tr><td class="lbl">${l}</td><td class="r">${v}</td><td class="why">${w || ""}</td></tr>`;
+  const ef = v => o.vProd ? nf2.format(100 * v / o.vProd) + "%" : "—";
+  const credTxt = c => c === "hoje" ? (o.fin === "revenda" ? (o.trib ? "ICMS + PIS + Cofins (revenda, produto tributado)" : "Só o ICMS (revenda; PIS/Cofins zero)") : "Zero: uso e consumo não gera crédito hoje") : c === "2027" ? (o.fin === "revenda" ? "ICMS (revenda) + todo o CBS/IBS" : "Só o CBS/IBS (crédito amplo)") : "Todo o CBS/IBS calculado na compra";
+  const cr = !o.venda;
+  const calc = `<div class="panel"><div class="panel-head"><div><h3>3 · Cálculo por cenário</h3><p>Fator da classe ${esc(o.classe)}: ${fTxt}. Cada tributo é arredondado antes da soma.</p></div></div>
+    <div class="table-wrap"><table class="calc"><tbody>
+      <tr><th colspan="3">Hoje</th></tr>${row("ICMS", brl(o.vICMS), o.vICMS_doc != null && o.vICMS_doc !== o.vICMS ? "zero na exportação (enunciado: erro de geração da DANFE)" : "como destacado na DANFE")}${row("PIS 1,65%", brl(o.pis), pisWhy)}${row("Cofins 7,6%", brl(o.cofins), o.cofins ? "mesma base × 7,6%" : "mesma regra do PIS")}
+      <tr class="tot"><td class="lbl">Imposto hoje</td><td class="r">${brl(o.hoje)}</td><td class="why">alíquota efetiva ${ef(o.hoje)}</td></tr>${cr ? row("Crédito hoje", brl(o.cred_hoje), credTxt("hoje")) : ""}
+      <tr><th colspan="3">2027</th></tr>${row("ICMS", brl(o.vICMS), o.vICMS_doc != null && o.vICMS_doc !== o.vICMS ? "zero na exportação" : "mantido em 2027")}${row("CBS 8,7%", brl(o.cbs27), `${brl(o.vProd)} × 8,7% × ${nf1.format(f)}`)}${row("IBS 0,1%", brl(o.ibs27), `${brl(o.vProd)} × 0,1% × ${nf1.format(f)}`)}
+      <tr class="tot"><td class="lbl">Imposto 2027</td><td class="r">${brl(o["2027"])}</td><td class="why">alíquota efetiva ${ef(o["2027"])}</td></tr>${cr ? row("Crédito 2027", brl(o.cred_2027), credTxt("2027")) : ""}
+      <tr><th colspan="3">2033</th></tr>${row("CBS 8,8%", brl(o.cbs33), `${brl(o.vProd)} × 8,8% × ${nf1.format(f)}`)}${row("IBS 17,7%", brl(o.ibs33), `${brl(o.vProd)} × 17,7% × ${nf1.format(f)}`)}
+      <tr class="tot"><td class="lbl">Imposto 2033</td><td class="r">${brl(o["2033"])}</td><td class="why">alíquota efetiva ${ef(o["2033"])} · ICMS e PIS/Cofins extintos</td></tr>${cr ? row("Crédito 2033", brl(o.cred_2033), credTxt("2033")) : ""}
+    </tbody></table></div></div>`;
+  return nota + malha + calc;
+}
+
+function openEvid(i) {
+  const o = items[i]; if (!o) return;
+  const dlg = document.getElementById("evid"), body = document.getElementById("evid-body");
+  document.getElementById("evid-title").textContent = o.desc;
+  body.innerHTML = itemHTML(o);
+  bindContest(body, o);
+  if (!dlg.open) dlg.showModal();
+  dlg.scrollTop = 0;
+}
+function bindContest(root, o) {
+  const ta = root.querySelector("#ct-motivo"), bt = root.querySelector("#ct-enviar");
+  if (ta && bt) {
+    ta.addEventListener("input", () => { bt.disabled = ta.value.trim().length < 5; });
+    bt.addEventListener("click", () => {
+      contest[o.key] = { motivo: ta.value.trim(), perfil: PERSONAS[persona].nome, quando: new Date().toISOString(), classe: o.classe };
+      if (decisoes[o.key]) { delete decisoes[o.key]; store.set("decisoes", decisoes); aplicar(); }
+      store.set("contestacoes", contest);
+      registrar("Contestação", `${o.desc} (NCM ${o.ncm}), classe ${o.classe}: ${ta.value.trim()}`, { key: o.key });
+      toast(`Grupo de ${o.desc} enviado para a fila de decisões.`);
+      go("decisoes", o.key);
+    });
+  }
+  root.querySelectorAll("[data-fila]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); go("decisoes", o.key); }));
+}
+document.getElementById("evid-close").addEventListener("click", () => document.getElementById("evid").close());
+
+// Busca global no topo: produto, código, chave da nota ou NCM.
+const qg = document.getElementById("q-global"), rg = document.getElementById("res-global");
+function buscar() {
+  const q = qg.value.toUpperCase().trim();
+  if (!q) { rg.hidden = true; return; }
+  const qd = q.replace(/\D/g, "");
+  const list = items.filter(o => o.desc.toUpperCase().includes(q) || o.cProd === q || (qd.length >= 4 && (o.chave.includes(qd) || o.ncm.includes(qd)))).slice(0, 8);
+  rg.hidden = false;
+  rg.innerHTML = list.length ? list.map(o => `<li><button type="button" data-i="${o.i}"><span class="t">${esc(o.desc)}</span><span class="s num">${o.venda ? "Venda" : "Compra"} · …${o.chave.slice(-8)} · item ${o.nItem} · ${esc(o.classe)}</span></button></li>`).join("") : `<li style="padding:8px 10px;color:var(--muted)">Nenhum item encontrado.</li>`;
+  rg.querySelectorAll("button[data-i]").forEach(b => b.addEventListener("click", () => { qg.value = ""; rg.hidden = true; openEvid(+b.dataset.i); }));
+}
+qg.addEventListener("input", buscar);
+qg.addEventListener("keydown", e => { if (e.key === "Escape") { qg.value = ""; rg.hidden = true; } });
+document.addEventListener("click", e => { if (!e.target.closest(".search")) rg.hidden = true; });
+function caminho(o) {
+  const temMapa = !!D.mapa[o.ncm], ordem = temMapa ? [1, 2, 4] : [1, 2, 3, 5];
+  const razoes = { 1: o.venda ? `CFOP ${o.cfop}, cliente ${o.tipo || "contribuinte"}: nenhuma regra de operação se aplica` : `CFOP ${o.cfop}: compra sem regra de operação`,
+    2: temMapa ? "O NCM está no mapa, mas o texto do anexo não decide sozinho" : `NCM ${o.ncm} não tem linha válida no mapa`, 3: "A descrição identifica o produto; o fornecedor não precisa ser consultado", 4: "Não há ambiguidade a julgar", 5: "" };
+  const humano = o.peneira === 6, alvo = humano ? o.base.peneira : o.peneira, out = [];
+  for (const id of ordem) {
+    if (id === alvo) {
+      out.push(humano ? { id, st: "passou", why: `Sugeriu ${o.base.classe} com confiança ${nf2.format(o.base.conf)}: ${o.base.fonte}` } : { id, st: "reteve" });
+      if (humano) out.push({ id: 6, st: "reteve" });
+      const resto = ordem.slice(ordem.indexOf(id) + 1);
+      if (!humano) resto.forEach(r => out.push({ id: r, st: "nao" }));
+      break;
+    }
+    out.push({ id, st: "passou", why: razoes[id] });
+  }
+  return out;
+}
+// ---------- motor e conferências ----------
+function renderPipeline() {
+  const T = D.tribunal, P = D.pipeline || {}, pt = document.getElementById("pn-tribunal"), pp = document.getElementById("pn-pipeline");
+  if (T && T.familias && T.familias.length) {
+    const c = T.custo_por_leitura || {}, a = c[T.politica_ativa] || {}, e = c.mapa_estrito || {}, dif = (a["2033"] != null && e["2033"] != null) ? (+a["2033"] - +e["2033"]) : null;
+    pt.hidden = false;
+    pt.innerHTML = `<div class="panel-head"><div><h3>Tribunal de premissas</h3><p>${T.familias.length} famílias em que a leitura do mapa estrito diverge da leitura técnica da LC 214. Política ativa no pipeline: <span class="mono">${esc(T.politica_ativa)}</span>. Cada família vira um grupo na fila de decisões.</p></div><button class="btn small" type="button" data-go="decisoes">Abrir a fila</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Família</th><th>NCM</th><th>Mapa estrito</th><th>Leitura técnica</th><th class="r">Itens</th><th>Referência legal</th></tr></thead><tbody>${T.familias.map(f => `<tr><td>${esc(f.descricao)}</td><td class="mono">${esc(f.ncm)}</td><td class="mono">${esc(f.classe_mapa)}</td><td class="mono">${esc(f.classe)}</td><td class="r num">${nf0.format(f.itens)}</td><td style="max-width:300px">${esc(f.referencia_legal)}</td></tr>`).join("")}</tbody></table></div>
+      ${dif != null ? `<p class="note">Imposto líquido de 2033 neste lote: <b>${brlC(+a["2033"])}</b> com a leitura técnica e <b>${brlC(+e["2033"])}</b> com o mapa estrito (diferença de ${signC(dif)}).</p>` : ""}`;
+  }
+  const eq = P.equilibrio || [], tr = P.transicao || [];
+  if (eq.length || tr.length) {
+    pp.hidden = false;
+    const num = v => nf2.format(+v);
+    pp.innerHTML = `<div class="panel-head"><div><h3>Saídas do pipeline</h3><p>Transição 2029–2032 e preço de equilíbrio, como calculados em <span class="mono">solucao/out</span>.</p></div></div>
+      ${tr.length ? `<div class="table-wrap" style="margin-bottom:14px"><table><thead><tr><th>Ano</th><th class="r">Fração do ICMS</th><th class="r">ICMS líquido</th><th class="r">CBS/IBS líquido</th><th class="r">Imposto líquido</th></tr></thead><tbody>${tr.map(r => `<tr><td>${esc(r.ano)}</td><td class="r num">${num(+r.fracao_icms * 100)}%</td><td class="r num">${brlC(+r.icms_liquido)}</td><td class="r num">${brlC(+r.cbs_ibs_liquido)}</td><td class="r num"><b>${brlC(+r.imposto_liquido)}</b></td></tr>`).join("")}</tbody></table></div><p class="note">${esc(tr[0].premissa)}. A tela Impacto usa outra premissa de interpolação; as duas ficam à vista para o controller escolher.</p>` : ""}
+      ${eq.length ? `<p class="note">${nf0.format(eq.length)} produtos com preço de equilíbrio calculado; a tela Preços e repasse recalcula com as decisões da fila.</p>` : ""}`;
+  }
+}
+function renderConferencias() {
+  const pen = {}, prodPen = {}, conf = {};
+  for (const o of items) { pen[o.peneira] = (pen[o.peneira] || 0) + 1; (prodPen[o.peneira] = prodPen[o.peneira] || new Set()).add(o.cProd); const k = o.conf.toFixed(2); conf[k] = (conf[k] || 0) + 1; }
+  const fila = items.filter(o => o.status === "REVISAR").length, hum = pen[6] || 0, regras = items.length - (pen[4] || 0) - hum;
+  document.getElementById("bignums").innerHTML = [[nf0.format(items.length), "itens no lote"], [nf0.format(D.meta.n_produtos), "produtos"], [D.meta.decisoes_unicas != null ? nf0.format(D.meta.decisoes_unicas) : "—", "decisões únicas de produto"],
+    [nf1.format(100 * regras / items.length) + "%", "decididos por regra"], [nf0.format(hum), "por revisão humana"], [nf0.format(fila), "na fila"], [D.meta.tokens_ia != null ? nf0.format(D.meta.tokens_ia) : "—", "tokens de IA"]]
+    .map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+  const ids = [1, 2, 3, 4, 5, 6], el = document.getElementById("ch-funil"), max = Math.max(...ids.map(i => pen[i] || 0), 1);
+  const W = Math.max(440, el.clientWidth || 440), rh = 46, H = ids.length * rh + 6, lab = 150; let g = "";
+  ids.forEach((id, i) => { const p = PEN[id], n = pen[id] || 0, y = 4 + i * rh, w = Math.max(2, n / max * (W - lab - 120));
+    g += `<text x="0" y="${y + 18}" style="fill:var(--ink);font-weight:600">${id} · ${esc(p.nome)}</text><text x="0" y="${y + 34}">${prodPen[id] ? prodPen[id].size : 0} produtos</text>`;
+    g += `<rect x="${lab}" y="${y + 8}" width="${w}" height="22" rx="3" fill="${id === 6 ? "var(--ok)" : "var(--brand)"}" tabindex="0" data-tip="${esc(`<b>${p.nome}</b><br>${p.pergunta}<br>${nf0.format(n)} itens<br><span style='opacity:.8'>${p.detalhe}</span>`)}"/>`;
+    g += `<text class="val" x="${lab + w + 8}" y="${y + 23}">${nf0.format(n)} · ${nf1.format(100 * n / items.length)}%</text>`; });
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Itens retidos por peneira">${g}</svg>`; bindTips(el);
+  const ce = document.getElementById("ch-conf"), ent = Object.entries(conf).sort((a, b) => +a[0] - +b[0]);
+  const cmax = Math.max(...ent.map(e => e[1]), 1), CW = Math.max(400, ce.clientWidth || 400), CH = 220, L = 12, B = 30, bw = (CW - 2 * L) / ent.length; let cg = `<line class="axis" x1="${L}" x2="${CW - L}" y1="${CH - B}" y2="${CH - B}"/>`;
+  ent.forEach(([k, v], i) => { const h = Math.max(2, v / cmax * (CH - B - 24)), x = L + i * bw + bw * 0.2, low = +k < 0.7, lbl = nf2.format(+k);
+    cg += `<rect x="${x}" y="${CH - B - h}" width="${bw * 0.6}" height="${h}" rx="3" fill="${low ? "var(--warn)" : "var(--brand)"}" tabindex="0" data-tip="${esc(`<b>Confiança ${lbl}</b><br>${nf0.format(v)} itens`)}"/>`;
+    cg += `<text class="val" x="${x + bw * 0.3}" y="${CH - B - h - 6}" text-anchor="middle">${nf0.format(v)}</text><text x="${x + bw * 0.3}" y="${CH - 10}" text-anchor="middle">${lbl}</text>`; });
+  ce.innerHTML = `<svg width="${CW}" height="${CH}" viewBox="0 0 ${CW} ${CH}" role="img" aria-label="Itens por nível de confiança">${cg}</svg>`; bindTips(ce);
+  renderPipeline();
+  document.getElementById("checks").innerHTML = (D.conferencias || []).map(c => `<li><span class="ic ${c.ok ? "ok" : "no"}">${c.ok ? "✓" : "!"}</span><div><b>${esc(c.nome)}</b><br>${esc(c.resultado)}<div class="d">${esc(c.detalhe)}</div></div></li>`).join("");
+}
+// ---------- painel executivo ----------
+function renderPainel() {
+  const R = resumo();
+  const card = (lbl, k, rel) => { const v = R[k].l, dv = v - R.hoje.l;
+    return `<div class="panel kpi"><span class="label">${lbl}</span><span class="value num">${brlC(v)}</span>
+      ${rel ? `<span class="delta ${dv > 0 ? "up" : "down"}">${signC(dv)} contra hoje</span>` : `<span class="delta" style="color:var(--muted)">ponto de partida</span>`}
+      <span class="sub num"><span>Débitos das vendas ${brlC(R[k].d)}</span><span>Créditos das compras ${brlC(R[k].c)}</span>${v < 0 ? "<span>Negativo: saldo credor com o fisco</span>" : ""}</span>
+      <span class="origin">Origem: ${nf0.format(R.nv)} itens de venda e ${nf0.format(R.nc)} de compra, calculados item a item</span></div>`; };
+  document.getElementById("kpis").innerHTML = card("Imposto líquido hoje", "hoje") + card("Em 2027", "2027", 1) + card("Em 2033", "2033", 1);
+  const cred = -ponte("2033").find(p => p.k.startsWith("Crédito de CBS")).v;
+  document.getElementById("finding").innerHTML = R["2033"].l < 0
+    ? `Em 2033 a Meridional fica com <b>saldo credor de ${brlC(-R["2033"].l)}</b>: o crédito de CBS/IBS nas compras (${brlC(cred)}) supera o imposto das vendas (${brlC(R["2033"].d)}). ${state.uso ? "A maior parte vem das compras de uso e consumo, que hoje não geram crédito nenhum." : "Mesmo sem o uso e consumo, o crédito das compras para revenda supera o débito das vendas."} O ganho é real, mas fica preso em crédito até ser compensado ou ressarcido.`
+    : `Em 2033 a Meridional paga <b>${brlC(R["2033"].l)}</b> de imposto líquido, ${signC(R["2033"].l - R.hoje.l)} contra hoje.`;
+  drawPonte(); drawTrans();
+  const ps = produtos().filter(p => Math.abs(p.imp["2033"]) > 0.005);
+  const pos = ps.filter(p => p.imp["2033"] > 0).sort((a, b) => b.imp["2033"] - a.imp["2033"]).slice(0, 6);
+  const neg = ps.filter(p => p.imp["2033"] < 0).sort((a, b) => a.imp["2033"] - b.imp["2033"]).slice(0, 6).reverse();
+  divBars(document.getElementById("ch-top"), [...pos, ...neg].map(p => ({ id: p.cProd, k: p.desc, v: p.imp["2033"], p })), signC,
+    r => `<b>${esc(r.p.desc)}</b> · ${esc(CLASSES[r.p.classe] || r.p.classe)}<br>Imposto das vendas ${signC(r.p.deb["2033"] - r.p.deb.hoje)}<br>Crédito das compras ${signC(r.p.cre["2033"] - r.p.cre.hoje)}<br><b>Efeito no líquido ${signC(r.v)}</b>`,
+    k => { state.pprod = k; location.hash = "#precos"; });
+}
+// ---------- preços e repasse ----------
+function renderPrecos() {
+  const cen = state.pcen, ps = produtos().filter(p => p.preco[cen]), q = (document.getElementById("q-preco").value || "").toUpperCase().trim();
+  const up = ps.filter(p => p.preco[cen].delta > 1).sort((a, b) => b.preco[cen].delta - a.preco[cen].delta);
+  const dn = ps.filter(p => p.preco[cen].delta < -1).sort((a, b) => a.preco[cen].delta - b.preco[cen].delta);
+  document.getElementById("pr-finding").innerHTML = (up.length ? `Em ${cen}, <b>${up.length} produto${up.length > 1 ? "s precisam" : " precisa"} de repasse</b> para manter a margem; o maior é ${esc(up[0].desc.toLowerCase())} (${pctSigned(up[0].preco[cen].delta)}). `
+      : `Em ${cen}, <b>nenhum produto precisa subir o preço mais de 1%</b> para manter a margem: quando o imposto da venda sobe, o crédito da compra do mesmo produto sobe junto. Pedido de reajuste "por causa da reforma" não se sustenta nesses itens. `)
+    + (dn.length ? `O ajuste relevante é para baixo, em <b>${dn.length} produtos</b> (até ${pctSigned(dn[0].preco[cen].delta)}): neles o crédito da compra cresce mais que o imposto da venda.` : "");
+  document.getElementById("pr-cards").innerHTML = `
+    <div class="panel kpi"><span class="label">Pedem repasse em ${cen}</span><span class="value num up">${up.length} produtos</span><span class="sub">Preço de equilíbrio mais de 1% acima do preço médio de hoje.${up.length ? ` Maior: ${esc(up[0].desc.toLowerCase())} (${pctSigned(up[0].preco[cen].delta)}).` : ""}</span></div>
+    <div class="panel kpi"><span class="label">Espaço para baixar preço</span><span class="value num down">${dn.length} produtos</span><span class="sub">Mantêm a margem com preço mais de 1% menor.${dn.length ? ` Maior: ${esc(dn[0].desc.toLowerCase())} (${pctSigned(dn[0].preco[cen].delta)}).` : ""}</span></div>
+    <div class="panel kpi"><span class="label">Sem mudança relevante</span><span class="value num">${ps.length - up.length - dn.length} produtos</span><span class="sub">Variação entre −1% e +1%.</span></div>`;
+  const rows = ps.filter(p => !q || p.desc.toUpperCase().includes(q) || p.cProd.includes(q)).sort((a, b) => b.preco[cen].delta - a.preco[cen].delta);
+  if (!state.pprod || !ps.find(p => p.cProd === state.pprod)) state.pprod = rows.length ? rows[0].cProd : null;
+  document.getElementById("pr-sub").textContent = `${ps.length} produtos com venda e compra para revenda no lote, ordenados pela variação.`;
+  document.getElementById("tb-preco").innerHTML = `<thead><tr><th>Produto</th><th class="r">Preço médio hoje</th><th class="r">Equilíbrio ${cen}</th><th class="r">Variação</th><th>Sugestão</th></tr></thead><tbody>` +
+    rows.map(p => { const x = p.preco[cen], s = x.delta > 1 ? `<span class="chip up">Repassar</span>` : x.delta < -1 ? `<span class="chip down">Espaço para baixar</span>` : `<span class="chip plain">Manter</span>`;
+      return `<tr class="click ${p.cProd === state.pprod ? "sel" : ""}" tabindex="0" data-p="${esc(p.cProd)}"><td><b>${esc(p.desc)}</b><br><span class="sub-mono">${esc(p.cProd)} · ${esc(p.classe)}</span></td><td class="r num">${brl(x.pv)}</td><td class="r num">${brl(x.novo)}</td><td class="r num"><span class="${x.delta > 0.05 ? "up" : x.delta < -0.05 ? "down" : ""}">${pctSigned(x.delta)}</span></td><td>${s}</td></tr>`; }).join("") + `</tbody>`;
+  document.querySelectorAll("#tb-preco tr[data-p]").forEach(tr => { const go = () => { state.pprod = tr.dataset.p; renderPrecos(); }; tr.addEventListener("click", go); tr.addEventListener("keydown", e => { if (e.key === "Enter") go(); }); });
+  const p = ps.find(x => x.cProd === state.pprod), box = document.getElementById("pr-detail");
+  if (!p) { box.innerHTML = `<p class="empty">Selecione um produto.</p>`; return; }
+  const x = p.preco[cen];
+  box.innerHTML = `<div class="panel-head"><div><h3>${esc(p.desc)}</h3><p>Valores por unidade, médias do lote. Classe ${esc(p.classe)} · ${esc(CLASSES[p.classe] || "")}.</p></div></div>
+    <div class="formula">
+      <div class="line"><span>Preço médio de venda hoje</span><b>${brl(x.pv)}</b></div>
+      <div class="line"><span>− imposto da venda hoje (alíquota efetiva ${pct(100 * x.ef0)})</span><b>${brl(x.iv0)}</b></div>
+      <div class="line"><span>+ crédito da compra hoje</span><b>${brl(x.cr0)}</b></div>
+      <div class="line"><span>− crédito da compra em ${cen}</span><b>${brl(x.crN)}</b></div>
+      <div class="line"><span>÷ (1 − alíquota efetiva da venda em ${cen}, ${pct(100 * x.ef)})</span><b>${nf2.format(1 - x.ef)}</b></div>
+      <div class="line res"><span>Preço de equilíbrio em ${cen}</span><b>${brl(x.novo)} · ${pctSigned(x.delta)}</b></div>
+    </div>
+    <p class="note">Fórmula do enunciado (nível 3): preço novo = (preço hoje − imposto hoje + crédito hoje − crédito novo) ÷ (1 − alíquota efetiva nova). Mantém a margem de hoje, ${brl(x.margem)} por unidade, com custo médio de ${brl(x.custo)}. Nos dados do case o preço médio de venda fica muito perto do custo, por isso leia a variação em %.</p>
+    <div class="row" style="margin-top:12px"><a href="#itens" id="pr-ver">Ver a trilha de um item deste produto</a></div>`;
+  document.getElementById("pr-ver").addEventListener("click", () => { const it = items.find(o => o.cProd === p.cProd && o.venda && o.cfop === "5102"); if (it) openEvid(it.i); });
+}
+// ---------- fornecedores e clientes ----------
+function renderParceiros() {
+  const f = {}, c = {};
+  for (const o of items) {
+    if (o.venda) { const x = c[o.contraparte] || (c[o.contraparte] = { cnpj: o.contraparte, v: 0, hoje: 0, "2033": 0 }); x.v += o.vProd; x.hoje += o.hoje; x["2033"] += o["2033"]; }
+    else { const x = f[o.contraparte] || (f[o.contraparte] = { cnpj: o.contraparte, v: 0, hoje: 0, "2033": 0, fin: o.fin }); x.v += o.vProd; x.hoje += o.cred_hoje; x["2033"] += o.cred_2033; }
+  }
+  const fs = Object.values(f).sort((a, b) => (b["2033"] - b.hoje) - (a["2033"] - a.hoje)), cs = Object.values(c).sort((a, b) => b.v - a.v);
+  const totN = fs.reduce((s, x) => s + x["2033"], 0), uso = fs.filter(x => x.fin === "uso_consumo"), usoN = uso.reduce((s, x) => s + x["2033"], 0);
+  document.getElementById("par-finding").innerHTML = `Em 2033 os fornecedores geram <b>${brlC(totN)}</b> de crédito para a Meridional. <b>${uso.length} fornecedores de uso e consumo respondem por ${nf1.format(100 * usoN / totN)}%</b> desse valor, e hoje não geram crédito nenhum. Comprar deles passa a custar menos, desde que a nota venha com CBS/IBS destacado corretamente.`;
+  const nm = c => (EMP[c] && EMP[c].razao_social) || (c ? fmtCnpj(c) : "Exterior");
+  document.getElementById("tb-forn").innerHTML = `<thead><tr><th>Fornecedor</th><th>Finalidade</th><th class="r">Compras</th><th class="r">Crédito hoje</th><th class="r">Crédito 2033</th><th class="r">Variação</th><th class="r">Parte do crédito 2033</th></tr></thead><tbody>` +
+    fs.map(x => `<tr><td><b>${esc(nm(x.cnpj))}</b><br><span class="sub-mono">${esc((EMP[x.cnpj] || {}).cnae_descricao || "")}</span></td><td>${x.fin === "uso_consumo" ? `<span class="chip warn">uso e consumo</span>` : `<span class="chip plain">revenda</span>`}</td><td class="r num">${brlC(x.v)}</td><td class="r num">${brlC(x.hoje)}</td><td class="r num">${brlC(x["2033"])}</td><td class="r num"><span class="down">${signC(x["2033"] - x.hoje)}</span></td><td class="r num">${nf1.format(100 * x["2033"] / totN)}%</td></tr>`).join("") + `</tbody>`;
+  document.getElementById("tb-cli").innerHTML = `<thead><tr><th>Cliente</th><th>Tipo</th><th class="r">Vendas</th><th class="r">Imposto hoje</th><th class="r">Imposto 2033</th><th class="r">Alíquota efetiva</th></tr></thead><tbody>` +
+    cs.map(x => { const t = (EMP[x.cnpj] || {}).tipo_cliente || "exterior"; return `<tr><td><b>${esc(nm(x.cnpj))}</b></td><td><span class="chip plain">${esc(t.replace("_", " "))}</span></td><td class="r num">${brlC(x.v)}</td><td class="r num">${brlC(x.hoje)}</td><td class="r num">${brlC(x["2033"])}</td><td class="r num">${pct(100 * x.hoje / x.v)} → ${pct(100 * x["2033"] / x.v)}</td></tr>`; }).join("") + `</tbody>`;
+}
+const premPrecisa = p => /bonifica|exporta/i.test(p.tema);
+const premAbertas = () => D.premissas.filter(p => premPrecisa(p) && !(premSt[p.tema] && premSt[p.tema].status === "Confirmada")).length;
+function acoesBase() {
+  const R = resumo(true), ps = produtos().filter(p => p.preco["2033"]);
+  const up = ps.filter(p => p.preco["2033"].delta > 1).sort((a, b) => b.preco["2033"].delta - a.preco["2033"].delta);
+  const dn = ps.filter(p => p.preco["2033"].delta < -1).sort((a, b) => a.preco["2033"].delta - b.preco["2033"].delta);
+  const pend = pendentes(), pendItens = pend.reduce((s, g) => s + g.its.length, 0), pa = premAbertas();
+  const t28 = transicao(28, true), t265 = transicao(26.5, true), dif = t28[t28.length - 1].l - t265[t265.length - 1].l;
+  const usoCred = items.filter(o => !o.venda && o.fin === "uso_consumo").reduce((s, o) => s + o.cred_2033, 0);
+  const nomes = l => l.slice(0, 3).map(p => p.desc.toLowerCase()).join(", ");
+  return [
+    { id: "fila", dono: "fiscal", t: "Decidir os grupos da fila de revisão", d: pend.length ? `${pend.length} grupo(s), ${nf0.format(pendItens)} itens. ${items.some(o => o.status === "REVISAR") ? "Item em REVISAR não conta como acerto na entrega." : "Os itens já têm classe; falta confirmar a leitura de cada família."}` : "Fila vazia.", imp: `${nf0.format(pendItens)} itens`, prazo: "Antes da entrega", auto: pend.length ? null : "Concluída" },
+    { id: "erp", dono: "fiscal", t: `Cadastrar o cClassTrib dos ${D.meta.n_produtos} produtos no ERP`, d: "Nota com código inexistente é rejeitada (erro 1023). O Crivo já traz a classe e a fonte de cada produto.", imp: `${D.meta.n_produtos} produtos`, prazo: "31/12/2026" },
+    { id: "prem", dono: "controller", t: "Confirmar as premissas em aberto", d: "Bonificação e exportação mudam o PIS/Cofins de hoje e precisam de validação.", imp: `${pa} premissa(s)`, prazo: "Antes da entrega", auto: pa ? null : "Concluída" },
+    { id: "caixa", dono: "cfo", t: "Planejar a compensação do saldo credor", d: `O crédito passa o débito a partir de 2027 e chega a ${brlC(-R["2033"].l)} em 2033. Definir como compensar ou pedir ressarcimento.`, imp: brlC(-R["2033"].l), prazo: "1º tri/2027" },
+    { id: "aliq", dono: "cfo", t: "Acompanhar a alíquota de referência", d: "O Senado ainda vai fixar a alíquota. Com 28%, o imposto líquido de 2033 muda neste valor.", imp: signC(dif), prazo: "Contínuo" },
+    up.length ? { id: "repasse", dono: "comercial", t: `Repassar preço em ${up.length} produtos`, d: `Os que mais sobem: ${nomes(up)}.`, imp: `até ${pctSigned(up[0].preco["2033"].delta)}`, prazo: "Tabela de 2027" }
+      : { id: "repasse", dono: "comercial", t: "Recusar reajustes de fornecedor justificados pela reforma", d: "Nenhum produto precisa subir mais de 1% para manter a margem: o crédito da compra cresce junto com o imposto da venda. Use a conta de cada produto na negociação.", imp: "89 produtos", prazo: "Tabela de 2027" },
+    { id: "reducao", dono: "comercial", t: `Rever preço de ${dn.length} produtos com imposto menor`, d: dn.length ? `Espaço para baixar preço mantendo a margem: ${nomes(dn)}.` : "Nenhum produto com espaço.", imp: dn.length ? `até ${pctSigned(dn[0].preco["2033"].delta)}` : "—", prazo: "Tabela de 2027" },
+    { id: "forn", dono: "compras", t: "Exigir CBS/IBS destacado dos fornecedores de uso e consumo", d: "Sem o imposto correto na nota, o crédito novo não se confirma.", imp: brlC(usoCred) + " em 2033", prazo: "Jan/2027" },
+  ];
+}
+// ---------- premissas ----------
+function renderPremissas() {
+  document.getElementById("tb-prem").innerHTML = `<thead><tr><th>Tema</th><th>Decisão</th><th>Fonte</th><th>Status</th></tr></thead><tbody>` +
+    D.premissas.map((p, i) => { const s = premSt[p.tema];
+      const st = !premPrecisa(p) ? `<span class="chip plain">Vigente</span>` : s && s.status === "Confirmada" ? `<span class="chip ok">Confirmada</span><br><span class="sub-mono">${esc(s.perfil)} · ${quando(s.quando)}</span>` : `<span class="chip warn">A confirmar</span><br><button class="btn small" type="button" data-conf="${i}" style="margin-top:6px">Confirmar</button>`;
+      return `<tr><td><b>${esc(p.tema)}</b></td><td>${esc(p.decisao)}</td><td style="color:var(--muted)">${esc(p.fonte)}</td><td>${st}</td></tr>`; }).join("") + `</tbody>`;
+  document.querySelectorAll("[data-conf]").forEach(b => b.addEventListener("click", () => {
+    const p = D.premissas[+b.dataset.conf]; premSt[p.tema] = { status: "Confirmada", perfil: PERSONAS[persona].nome, quando: new Date().toISOString() }; store.set("premissas", premSt);
+    registrar("Premissa confirmada", `${p.tema}: ${p.decisao}`); renderNav(); renderPremissas(); toast(`Premissa confirmada: ${p.tema}.`);
+  }));
+  const cont = {}; items.forEach(o => cont[o.classe] = (cont[o.classe] || 0) + 1);
+  document.getElementById("tb-classes").innerHTML = `<thead><tr><th>cClassTrib</th><th>Hipótese</th><th class="r">Redução</th><th class="r">Itens</th></tr></thead><tbody>` +
+    Object.entries(CLASSES).map(([c, n]) => `<tr><td class="mono">${c}</td><td>${esc(n)}</td><td class="r num">${c.startsWith("410") ? "sem incidência" : nf0.format(100 * (1 - FATOR[c])) + "%"}</td><td class="r num">${nf0.format(cont[c] || 0)}</td></tr>`).join("") + `</tbody>`;
+}
+
+// ---------- auditoria ----------
+function renderAuditoria() {
+  const all = [...log, { quando: D.meta.gerado_em, perfil: "Crivo (motor)", acao: "Lote processado", detalhe: `${nf0.format(D.meta.n_notas)} notas, ${nf0.format(D.meta.n_itens)} itens, classificação ${D.meta.classificacao}` }];
+  document.getElementById("tb-log").innerHTML = `<thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Detalhe</th><th></th></tr></thead><tbody>` +
+    all.map(e => `<tr><td class="num" style="white-space:nowrap">${quando(e.quando)}</td><td>${esc(e.perfil)}</td><td><b>${esc(e.acao)}</b></td><td>${esc(e.detalhe)}</td><td>${e.acao === "Decisão de revisão" && decisoes[e.key] && decisoes[e.key].quando === e.quando ? `<button class="btn small" type="button" data-undo="${esc(e.key)}">Desfazer</button>` : ""}</td></tr>`).join("") + `</tbody>`;
+  document.querySelectorAll("[data-undo]").forEach(b => b.addEventListener("click", () => desfazer(b.dataset.undo)));
+}
+// ---------- exportar ----------
+function gerarEntrega() {
+  const csv = ["chave;nItem;cClassTrib;status;confianca;imposto_seletivo;fonte"];
+  for (const o of items) csv.push([o.chave, o.nItem, o.classe, o.status, o.conf.toFixed(2), o.is_sel ? "sim" : "nao", String(o.fonte).replace(/[;\r\n]+/g, ",")].join(";"));
+  const R = resumo(true), sim = { cenarios: ["hoje", "2027", "2033"], itens: [], resumo: [] };
+  for (const o of items) {
+    const it = { chave: o.chave, nItem: o.nItem, perspectiva: o.venda ? "venda" : "compra", cClassTrib: o.classe, vProd: o.vProd };
+    for (const c of ["hoje", "2027", "2033"]) it[c] = { imposto: o[c], aliquota_efetiva_pct: o.vProd ? r2(100 * o[c] / o.vProd) : 0, credito: o.venda ? null : o["cred_" + c] };
+    sim.itens.push(it);
+  }
+  for (const c of ["hoje", "2027", "2033"]) { const v = r2(R[c].l - R.hoje.l); sim.resumo.push({ cenario: c, debitos_vendas: R[c].d, creditos_compras: R[c].c, imposto_liquido: R[c].l, variacao_vs_hoje: v, variacao_vs_hoje_pct: R.hoje.l ? r2(100 * v / Math.abs(R.hoje.l)) : 0 }); }
+  return { csv: csv.join("\r\n") + "\r\n", json: JSON.stringify(sim, null, 1), sim };
+}
+function validar(ent) {
+  const ck = [], err = [], av = [], vistos = new Set();
+  for (const o of items) {
+    if (!/^\d{44}$/.test(o.chave)) err.push("chave inválida");
+    if (!/^\d{6}$/.test(o.classe)) err.push("cClassTrib sem 6 dígitos");
+    if (!["CLASSIFICADO", "REVISAR"].includes(o.status)) err.push("status inválido");
+    if (!(o.conf >= 0 && o.conf <= 1)) err.push("confiança fora de 0 a 1");
+    if (o.status === "REVISAR" && o.conf >= 0.7) av.push("REVISAR com confiança ≥ 0,70");
+    if (!String(o.fonte).trim()) av.push("fonte vazia");
+    const k = o.chave + "|" + o.nItem; if (vistos.has(k)) err.push("(chave, nItem) duplicado"); vistos.add(k);
+  }
+  ck.push({ ok: !err.length, t: "itens_classificados.csv", d: err.length ? `${err.length} erro(s): ${[...new Set(err)].join(", ")}` : `${nf0.format(items.length)} linhas, 7 colunas, chaves de 44 dígitos, classes de 6 dígitos, sem duplicados` });
+  ck.push({ ok: items.length >= 15000, t: "Cobertura", d: `${nf0.format(items.length)} de 15.000 itens do pacote` });
+  ck.push({ ok: !av.length, t: "Avisos do validador", d: av.length ? [...new Set(av)].join(", ") : "Nenhum aviso" });
+  const vendasOk = ent.sim.itens.every(it => it.perspectiva === "compra" || ["hoje", "2027", "2033"].every(c => it[c].credito === null));
+  ck.push({ ok: vendasOk && ent.sim.resumo.length === 3, t: "simulacao.json", d: "Imposto, alíquota efetiva e crédito nos três cenários; crédito nulo nas vendas; resumo com débitos, créditos, líquido e variação" });
+  return ck;
+}
+function renderExportar() {
+  const ent = gerarEntrega(), rev = items.filter(o => o.status === "REVISAR").length, hum = items.filter(o => o.peneira === 6).length, is = items.filter(o => o.is_sel).length;
+  document.getElementById("ex-cards").innerHTML = `
+    <div class="panel kpi"><span class="label">Itens classificados</span><span class="value num">${nf0.format(items.length - rev)}</span><span class="sub">${nf0.format(hum)} por revisão humana</span></div>
+    <div class="panel kpi"><span class="label">Em REVISAR</span><span class="value num ${rev ? "up" : ""}">${nf0.format(rev)}</span><span class="sub">${rev ? "Não contam como acerto. Decida na fila antes de exportar." : "Fila vazia."}</span>${rev ? `<a href="#revisao" class="note">Abrir a fila de revisão</a>` : ""}</div>
+    <div class="panel kpi"><span class="label">Imposto Seletivo sinalizado</span><span class="value num">${nf0.format(is)}</span><span class="sub">Itens de refrigerante; não entram no cálculo</span></div>`;
+  document.getElementById("ex-checks").innerHTML = validar(ent).map(c => `<li><span class="ic ${c.ok ? "ok" : "no"}">${c.ok ? "✓" : "!"}</span><div><b>${esc(c.t)}</b><div class="d">${esc(c.d)}</div></div></li>`).join("");
+  document.getElementById("sz-csv").textContent = nf1.format(ent.csv.length / 1e6) + " MB";
+  document.getElementById("sz-json").textContent = nf1.format(ent.json.length / 1e6) + " MB";
+}
+function baixar(nome, conteudo, tipo) {
+  try {
+    const url = URL.createObjectURL(new Blob([conteudo], { type: tipo })), a = document.createElement("a");
+    a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    registrar("Exportação", `${nome} gerado com ${nf0.format(items.length)} itens`); toast(`${nome} gerado.`);
+  } catch (e) { toast("O navegador bloqueou o download. Use a cópia local do repositório."); }
+}
+document.getElementById("dl-csv").addEventListener("click", () => baixar("itens_classificados.csv", gerarEntrega().csv, "text/csv;charset=utf-8"));
+document.getElementById("dl-json").addEventListener("click", () => baixar("simulacao.json", gerarEntrega().json, "application/json"));
+window.CRIVO_APP = { items, simular, gerarEntrega, resumo };
+
+// ---------- plano de execução: ações do lote + ações encaminhadas, com responsável, prazo e status ----------
+function planoAcoes() {
+  const base = acoesBase().map(a => { const o = plano.over[a.id] || {}; return { ...a, origem: "Lote", dono: o.dono || a.dono, prazo: o.prazo || a.prazo, status: a.auto || o.status || "A fazer" }; });
+  const extra = plano.extra.map(a => { const o = plano.over[a.id] || {}; return { ...a, dono: o.dono || a.dono, prazo: o.prazo || a.prazo, status: o.status || a.status || "A fazer" }; });
+  return [...extra, ...base];
+}
+function addAcao(a) {
+  const id = "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  plano.extra.unshift({ id, status: "A fazer", origem: "Manual", ...a });
+  savePlano();
+  registrar("Ação criada", `${a.t}${a.origem ? " (" + a.origem + ")" : ""}`);
+}
+const personaOpts = sel => Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}" ${k === sel ? "selected" : ""}>${p.nome}</option>`).join("");
+
+function renderPlano() {
+  const list = planoAcoes().filter(a => !state.minhas || a.dono === persona);
+  document.getElementById("tb-plano").innerHTML = `<thead><tr><th>Ação</th><th>Origem</th><th>Responsável</th><th>Prazo</th><th class="r">Impacto</th><th>Status</th></tr></thead><tbody>` +
+    (list.length ? list.map(a => `<tr>
+      <td><b>${esc(a.t)}</b><br><span style="color:var(--muted);font-size:12.5px">${esc(a.d)}</span></td>
+      <td><span class="chip plain">${esc(a.origem)}</span></td>
+      <td><select class="st" data-dono="${esc(a.id)}" aria-label="Responsável">${personaOpts(a.dono)}</select></td>
+      <td><input class="st" data-prazo="${esc(a.id)}" value="${esc(a.prazo)}" style="width:150px" aria-label="Prazo"></td>
+      <td class="r num">${esc(a.imp)}</td>
+      <td>${a.auto ? `<span class="chip ok">${esc(a.auto)}</span>` : `<select class="st" data-status="${esc(a.id)}" aria-label="Status">${["A fazer", "Em andamento", "Concluída"].map(s => `<option ${s === a.status ? "selected" : ""}>${s}</option>`).join("")}</select>`}</td></tr>`).join("")
+      : `<tr><td colspan="6"><p class="empty">Nenhuma ação para este filtro.</p></td></tr>`) + `</tbody>`;
+  const tit = id => (planoAcoes().find(x => x.id === id) || {}).t || "";
+  const salvarOver = (id, campo, valor) => { plano.over[id] = { ...(plano.over[id] || {}), [campo]: valor }; savePlano(); };
+  document.querySelectorAll("[data-dono]").forEach(s => s.addEventListener("change", () => {
+    salvarOver(s.dataset.dono, "dono", s.value); registrar("Responsável alterado", `${tit(s.dataset.dono)}: ${PERSONAS[s.value].nome}`); renderPlano(); renderNav();
+  }));
+  document.querySelectorAll("[data-prazo]").forEach(s => s.addEventListener("change", () => {
+    salvarOver(s.dataset.prazo, "prazo", s.value.trim()); registrar("Prazo alterado", `${tit(s.dataset.prazo)}: ${s.value.trim() || "sem prazo"}`); renderPlano();
+  }));
+  document.querySelectorAll("[data-status]").forEach(s => s.addEventListener("change", () => {
+    salvarOver(s.dataset.status, "status", s.value); registrar("Ação atualizada", `${tit(s.dataset.status)}: ${s.value}`); renderNav(); toast("Status atualizado.");
+  }));
+}
+
+// ---------- central de trabalho: o que cada perfil faz agora ----------
+function renderCentral() {
+  const P = PERSONAS[persona], R = resumo(true), gs = filaOrdenada(), pendItens = gs.reduce((s, g) => s + g.its.length, 0);
+  const ps = produtos().filter(p => p.preco["2033"]);
+  const up = ps.filter(p => p.preco["2033"].delta > 1).sort((a, b) => b.preco["2033"].delta - a.preco["2033"].delta);
+  const dn = ps.filter(p => p.preco["2033"].delta < -1).sort((a, b) => a.preco["2033"].delta - b.preco["2033"].delta);
+  const pa = premAbertas(), rev = items.filter(o => o.status === "REVISAR").length, nContest = Object.keys(contest).length, nDec = Object.keys(decisoes).length;
+  const t28 = transicao(28, true), t265 = transicao(26.5, true), dif = t28[t28.length - 1].l - t265[t265.length - 1].l;
+  const usoCred = items.filter(o => !o.venda && o.fin === "uso_consumo").reduce((s, o) => s + o.cred_2033, 0);
+  const item = (t, d, cta, page, grupo, tom) => `<li class="task ${tom || ""}"><div><b>${esc(t)}</b><span class="d">${esc(d)}</span></div>${cta ? `<button class="btn small ${tom === "risk" || tom === "warn" ? "" : "primary"}" type="button" data-go="${esc(page)}"${grupo ? ` data-grupo="${esc(grupo)}"` : ""}>${esc(cta)}</button>` : ""}</li>`;
+
+  const tarefas = {
+    fiscal: [
+      gs.length ? item(`Decidir ${gs.length} grupo${plural(gs.length)} da fila`, `${nf0.format(pendItens)} itens sem classe decidida. Uma decisão vale para o grupo inteiro e recalcula o painel.`, "Decidir", "decisoes", gs[0].key) : "",
+      item("Conferir e exportar a entrega", rev ? `${nf0.format(rev)} itens em REVISAR bloqueiam a entrega.` : "Sem pendências: valide os dois arquivos.", "Exportar", "exportar"),
+    ],
+    controller: [
+      pa ? item(`Confirmar ${pa} premissa${plural(pa)} em aberto`, "Escolhas de bonificação e exportação que mudam o PIS/Cofins de hoje.", "Confirmar", "premissas") : "",
+      item("Conferir as validações do motor", "Peneiras, confiança e conferências automáticas, sem gabarito.", "Ver motor", "motor"),
+      item("Revisar contestações e decisões", `${nContest} grupo${plural(nContest)} contestado${plural(nContest)} e ${nDec} decisão${nDec === 1 ? "" : "es"} registrada${plural(nDec)}.`, "Auditoria", "auditoria"),
+    ],
+    cfo: [
+      item("Planejar a compensação do saldo credor", `Em 2033 o imposto líquido é ${brlC(R["2033"].l)}. Defina como compensar ou pedir ressarcimento.`, "Ver impacto", "impacto"),
+      item("Acompanhar a alíquota de referência", `Se o Senado fixar 28%, o líquido de 2033 muda ${signC(dif)}.`, "Simular", "impacto"),
+    ],
+    comercial: [
+      up.length ? item(`Decidir repasse de ${up.length} produto${plural(up.length)}`, `Maior: ${up[0].desc.toLowerCase()} (${pctSigned(up[0].preco["2033"].delta)}).`, "Ver preços", "precos")
+        : item("Nenhum produto pede repasse", "Não há reajuste a justificar pela reforma: o crédito da compra acompanha o imposto da venda.", "", ""),
+      dn.length ? item(`Rever preço de ${dn.length} produto${plural(dn.length)}`, `Espaço para baixar preço mantendo a margem. Maior: ${dn[0].desc.toLowerCase()} (${pctSigned(dn[0].preco["2033"].delta)}).`, "Ver preços", "precos") : "",
+    ],
+    compras: [
+      item("Exigir CBS/IBS destacado de fornecedores de uso e consumo", `Gera ${brlC(usoCred)} de crédito em 2033, se a nota vier com o imposto certo.`, "Ver fornecedores", "parceiros"),
+    ],
+  };
+  const riscos = [
+    R["2033"].l < 0 ? item(`Saldo credor de ${brlC(-R["2033"].l)} em 2033`, "O crédito novo passa o débito. O dinheiro fica preso até ser compensado ou ressarcido.", "Ver impacto", "impacto", "", "risk") : "",
+    gs.length ? item(`${gs.length} grupo${plural(gs.length)} sem decisão`, rev ? `${nf0.format(pendItens)} itens em REVISAR não contam como acerto na entrega.` : `${nf0.format(pendItens)} itens já têm classe, mas aguardam a confirmação do fiscal.`, "Decidir", "decisoes", gs[0].key, "risk") : "",
+    pa ? item(`${pa} premissa${plural(pa)} a confirmar`, "Escolhas que mudam o PIS/Cofins de hoje e dependem da organização.", "Confirmar", "premissas", "", "risk") : "",
+    item(`Alíquota de 28% muda 2033 em ${signC(dif)}`, "A alíquota de referência ainda não foi fixada.", "Simular", "impacto", "", "risk"),
+    up.length ? item(`${up.length} produto${plural(up.length)} pede${up.length === 1 ? "" : "m"} repasse`, "Preço de equilíbrio mais de 1% acima do de hoje.", "Ver preços", "precos", "", "risk") : "",
+  ];
+  const minhas = planoAcoes().filter(a => a.dono === persona && a.status !== "Concluída").slice(0, 5);
+  const logs = log.filter(e => /Decisão|Premissa|Contestação|Ação criada/.test(e.acao)).slice(0, 5);
+
+  document.getElementById("cen-missao").innerHTML = `<b>${esc(P.nome)}.</b> ${esc(P.missao)}`;
+  document.getElementById("cen-kpis").innerHTML = `
+    <a class="panel kpi card-link" href="#decisoes"><span class="label">Fila de decisões</span><span class="value num">${gs.length}</span><span class="sub">${gs.length ? `grupos · ${nf0.format(pendItens)} itens sem classe decidida` : "fila vazia"}</span><span class="go">Abrir a fila →</span></a>
+    <a class="panel kpi card-link" href="#impacto"><span class="label">Imposto líquido 2033</span><span class="value num">${brlC(R["2033"].l)}</span><span class="delta ${R["2033"].l - R.hoje.l > 0 ? "up" : "down"}">${signC(R["2033"].l - R.hoje.l)} contra hoje</span><span class="go">Ver impacto →</span></a>
+    <a class="panel kpi card-link" href="#premissas"><span class="label">Premissas a confirmar</span><span class="value num">${pa}</span><span class="sub">escolhas que mudam o PIS/Cofins de hoje</span><span class="go">Confirmar →</span></a>`;
+  document.getElementById("cen-tarefas").innerHTML = (tarefas[persona] || []).filter(Boolean).join("") || `<p class="empty">Nada pendente para este perfil.</p>`;
+  document.getElementById("cen-riscos").innerHTML = riscos.filter(Boolean).join("") || `<p class="empty">Nenhum risco aberto.</p>`;
+  document.getElementById("cen-acoes").innerHTML = minhas.length ? minhas.map(a => item(a.t, `${a.prazo} · ${a.imp} · ${a.status}`, "Abrir plano", "plano", "", "")).join("") : `<p class="empty">Nenhuma ação em aberto para este perfil.</p>`;
+  document.getElementById("cen-log").innerHTML = logs.length ? logs.map(e => `<li class="task"><div><b>${esc(e.acao)}</b><span class="d">${quando(e.quando)} · ${esc(e.perfil)} · ${esc(e.detalhe || "")}</span></div></li>`).join("") : `<p class="empty">Nenhuma decisão registrada ainda.</p>`;
+}
+
+// ---------- navegação ----------
+const PAGES = {
+  central: ["Central de trabalho", "Hoje"], decisoes: ["Decisões", "Trabalho"], plano: ["Plano de execução", "Trabalho"],
+  impacto: ["Impacto", "Leitura"], precos: ["Preços e repasse", "Leitura"], parceiros: ["Fornecedores e clientes", "Leitura"],
+  motor: ["Motor e conferências", "Controle"], premissas: ["Premissas", "Controle"], auditoria: ["Auditoria", "Controle"], exportar: ["Exportar entrega", "Controle"],
+};
+const atual = () => (location.hash.slice(1) in PAGES) ? location.hash.slice(1) : "central";
+function renderNav() {
+  const cur = atual(), pend = pendentes().length, abertas = planoAcoes().filter(a => a.status !== "Concluída").length, pa = premAbertas();
+  const badge = n => n ? `<span class="badge">${n}</span>` : "";
+  const link = (id, extra) => `<a href="#${id}" aria-current="${id === cur ? "page" : "false"}">${PAGES[id][0]}${extra || ""}</a>`;
+  document.getElementById("nav").innerHTML = link("central") +
+    `<div class="grp">Trabalho</div>` + link("decisoes", badge(pend)) + link("plano", badge(abertas)) +
+    `<div class="grp">Leitura</div>` + link("impacto") + link("precos") + link("parceiros") +
+    `<div class="grp">Controle</div>` + link("motor") + link("premissas", badge(pa)) + link("auditoria") + link("exportar");
+}
+function route() {
+  const id = atual();
+  Object.keys(PAGES).forEach(p => { document.getElementById("page-" + p).hidden = p !== id; });
+  document.getElementById("page-title").textContent = PAGES[id][0];
+  document.getElementById("crumb").textContent = id === "central" ? PERSONAS[persona].nome : PAGES[id][1];
+  renderNav(); hideTip();
+  ({ central: renderCentral, decisoes: renderDecisoes, plano: renderPlano, impacto: renderPainel, precos: renderPrecos, parceiros: renderParceiros,
+     motor: renderConferencias, premissas: renderPremissas, auditoria: renderAuditoria, exportar: renderExportar })[id]();
+}
+
+// ---------- inicialização e ligações ----------
+document.getElementById("badge-class").innerHTML = D.meta.origem === "pipeline" ? `<span class="chip ok" title="Classe, confiança e fonte vêm de solucao/out do pipeline do time">Pipeline do time</span>` : D.meta.classificacao === "provisoria" ? `<span class="chip warn" title="Classificação provisória do gerador, até o motor entregar itens_classificados.csv">Classificação provisória</span>` : `<span class="chip ok">Classificação do motor</span>`;
+const sel = document.getElementById("sel-persona");
+sel.innerHTML = personaOpts(persona);
+sel.addEventListener("change", () => { persona = sel.value; store.set("persona", persona); state.grupo = null; route(); });
+document.getElementById("na-d").innerHTML = personaOpts(persona);
+const naT = document.getElementById("na-t"), naP = document.getElementById("na-p"), naB = document.getElementById("na-add");
+const naCheck = () => { naB.disabled = naT.value.trim().length < 5; };
+naT.addEventListener("input", naCheck);
+naB.addEventListener("click", () => {
+  addAcao({ t: naT.value.trim(), d: "Ação criada manualmente.", imp: "—", prazo: naP.value.trim() || "Sem prazo", dono: document.getElementById("na-d").value, origem: "Manual" });
+  naT.value = ""; naP.value = ""; naCheck(); renderPlano(); renderNav(); toast("Ação adicionada ao plano.");
+});
+document.getElementById("opt-minhas").addEventListener("change", e => { state.minhas = e.target.checked; renderPlano(); });
+document.getElementById("opt-uso").addEventListener("change", e => { state.uso = e.target.checked; renderPainel(); });
+document.querySelectorAll("[data-ponte]").forEach(b => b.addEventListener("click", () => { state.ponte = b.dataset.ponte; document.querySelectorAll("[data-ponte]").forEach(x => x.setAttribute("aria-pressed", x === b)); drawPonte(); }));
+document.querySelectorAll("[data-pcen]").forEach(b => b.addEventListener("click", () => { state.pcen = b.dataset.pcen; document.querySelectorAll("[data-pcen]").forEach(x => x.setAttribute("aria-pressed", x === b)); renderPrecos(); }));
+const aliq = document.getElementById("opt-aliq");
+aliq.addEventListener("input", () => { state.aliq = +aliq.value; document.getElementById("out-aliq").textContent = nf1.format(state.aliq) + "%"; drawTrans(); });
+document.getElementById("q-preco").addEventListener("input", renderPrecos);
+// Qualquer [data-go] (botões de tarefa, risco, atalhos) navega; grupo opcional abre a fila já no item certo.
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  e.preventDefault(); go(b.dataset.go, b.dataset.grupo || null);
+});
+addEventListener("hashchange", () => { route(); scrollTo(0, 0); });
+let rz, lw = innerWidth; addEventListener("resize", () => { if (innerWidth === lw) return; lw = innerWidth; clearTimeout(rz); rz = setTimeout(route, 200); });
+document.getElementById("ws-lote").textContent = `Lote maio/2026 · ${nf0.format(D.meta.n_notas)} notas · ${nf0.format(D.meta.n_itens)} itens`;
+document.getElementById("side-foot").textContent = `Dados de ${quando(D.meta.gerado_em)} · gerar_painel.py · dados sintéticos do Hackathon ESPM`;
+route();
+})();
+</script>
