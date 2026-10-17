@@ -1,5 +1,14 @@
 # Roteiro de mudanças para a solução do hackathon
 
+> **Status (2026-10-17): este roteiro foi implementado.** Vários itens de P0/P1
+> já estavam resolvidos antes da execução (1.1, 1.2, 2.4, slider de repasse) e os
+> demais foram implementados com **LLM obrigatório**. O plano detalhado e o
+> resultado estão em `PLANO-IMPLEMENTACAO-LLM.md`, e o funcionamento do juiz LLM
+> em `USO-DO-LLM.md`. Os documentos `SOLUCAO.md`, `RESULTADOS.md`,
+> `COMO-RODAR.md`, `DECISOES.md`, `QUALIDADE-E-CORRECOES.md`, `MANIFESTO.md`,
+> `IMPACTO-PACOTE-OFICIAL.md`, `CONTEXTO.md` e `README.md` já refletem a versão
+> atual.
+
 ## Objetivo
 
 Levar a solução atual de uma entrega tecnicamente funcional para uma entrega **alinhada ao pipeline esperado, defensável na classificação, correta nos cenários exigidos e clara para a banca** — sem aumentar o escopo além do que contribui para a avaliação.

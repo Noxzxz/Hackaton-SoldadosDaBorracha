@@ -15,7 +15,7 @@ Todos os números abaixo vêm da execução com o **pacote oficial novo**
 | Compras / vendas | 720 / 667 notas (11.700 / 3.300 itens) |
 | CFOP 5102 / 5101 / 7102 / 5910 | 11.516 / 2.999 / 447 / 38 |
 | `REVISAR` | **0** |
-| Confiança mínima / média | 0,72 / 0,865 |
+| Confiança mínima / média | 0,72 / 0,878 |
 | Itens com Imposto Seletivo | 497 |
 
 ---
@@ -35,6 +35,24 @@ Todos os números abaixo vêm da execução com o **pacote oficial novo**
 
 Todas as 8 classes são vigentes e têm CST válido. Os 447 itens de exportação são
 todos `410004`.
+
+### 2.1 Juiz LLM (exceções)
+
+Aplicado `avaliar_mapa` (vigência/permissão/condição/exceção), restaram **10
+produtos ambíguos** (todos dispositivos médicos `200005` × `200030`). O juiz LLM
+decidiu **10/10** com justificativa, `confianca ≤ 0,90`, **0 `REVISAR`** e a
+distribuição de classes **inalterada**.
+
+| Etapa | Quantidade |
+|---|---:|
+| Produtos únicos (`cProd × NCM`) | 95 |
+| Produtos com >1 candidato bruto no mapa | ~47 |
+| **Fila do juiz LLM** | **10** |
+| Chamadas (1ª execução) | **10** (~3.683 tokens de entrada / 5.583 de saída) |
+| Chamadas seguintes (cache) | 0 |
+
+Artefatos: `out/auditoria_ambiguos.csv`, `out/cache_llm.json`,
+`out/uso_tokens.json`. Detalhes em `USO-DO-LLM.md`.
 
 ---
 
@@ -88,7 +106,7 @@ identificado. A classificação dos 4 itens é idêntica.
 
 | Verificação | Resultado |
 |---|---|
-| `python -m pytest -q` | **28 passed** |
+| `python -m pytest -q` | **42 passed** |
 | `python scripts/validar_entrega.py` | **TUDO OK** |
 | Validador oficial (`templates-entrega/validar_entrega.py`) | **FORMATO OK** |
 | `ruff check --select F,E9` | **All checks passed** |

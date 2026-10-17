@@ -7,7 +7,8 @@ apresenta a parte técnica do pitch.
 > **Ideia central do pitch:** tratamos **fatos** e **decisões** de forma
 > separada. Os 15.000 itens são fatos e **nunca** são descartados; o que
 > deduplicamos é o **raciocínio de classificação** (95 produtos) e as **tabelas
-> oficiais**. Determinístico, rastreável e com 0 tokens.
+> oficiais**. Determinístico e rastreável; o juiz LLM só entra nas exceções
+> (~10 produtos), com cache e validação.
 
 ---
 
@@ -62,7 +63,7 @@ entregamos número sem prova.
 ### 2.4 Processamento paralelo + cache (`src/extrair.py`)
 - 1.387 notas em `ProcessPoolExecutor` (até 8 processos).
 - Resultado cacheado em `out/itens.parquet` e `out/notas.parquet`.
-- **Reprodutível**: as execuções seguintes nem reabrem os PDFs (0 tokens).
+- **Reprodutível**: as execuções seguintes nem reabrem os PDFs.
 
 ### 2.5 Dinheiro sempre exato (`src/simular.py`)
 - `Decimal` + `ROUND_HALF_UP`, 2 casas.
@@ -153,8 +154,8 @@ Uma alternativa comum seria **agrupar/somar** linhas repetidas (`groupby` +
 | Produtos únicos (`cProd × NCM`) | 95 |
 | Mapa deduplicado | 4.193 → 3.792 |
 | Itens em `REVISAR` | 0 |
-| Testes | 28 verdes |
-| LLM no caminho principal | 0 tokens |
+| Testes | 42 verdes |
+| Juiz LLM | só nas exceções (10 produtos → 10 chamadas, depois cache) |
 
 **Mensagem final sugerida:**
 > *"Tratamos cada um dos 15.000 itens como fato, com prova de reconciliação em

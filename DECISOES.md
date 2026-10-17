@@ -72,18 +72,25 @@ Cada uma tem contexto, escolha e justificativa.
   sentinela interno (`__DEC__` → substituido por regex). Nenhum arredondamento por
   float no caminho do dinheiro; ha um teste de propriedade que verifica HALF_UP.
 
-## 9. LLM: 0 tokens
-- A cascata resolve os 128 produtos; `llm_juiz.py` existe (lote, cache em disco,
-  validacao contra a tabela oficial) mas **nao e acionado**. Determinismo total
-  (reexecucoes reproduzem a mesma saida).
-- No pacote oficial novo a **eficiencia deixou de ser criterio** de avaliacao
-  (acuracia 35%, simulacao 25%, calibracao 10%, painel 20%, pitch 10%).
+## 9. LLM obrigatorio: juiz cirurgico das excecoes
+- Requisito do hackathon: **usar LLM/agente**. O LLM passa a ser uma etapa real do
+  pipeline, mas **cirurgica**: decide apenas os produtos que a cascata nao fecha
+  (mais de uma classe valida, ou condicao nao mapeada).
+- `classificar.py`: `ambiguo = len(classes) > 1 or aval.ambiguidade_condicao`.
+- **1 chamada por produto** (nunca por item): 10 produtos neste dataset → 10
+  chamadas (depois, cache). Fila em `src/llm_juiz.py::resolver_fila`.
+- Resposta **confinada** aos candidatos validados, `REVISAR` como saida segura,
+  confianca `<= 0,90`, cache por SHA-256, fallback deterministico se indisponivel.
+- Modelo/endpoint sao o **ponto unico de configuracao** (`config/llm.yaml`); sem
+  modelo/chave o pipeline roda em dry-run. Ver `USO-DO-LLM.md`.
+- Apesar de o pacote oficial novo ter removido a eficiencia (tokens) da rubrica, o
+  LLM segue util para acuracia/rastreabilidade e atende ao requisito do evento.
 
 ## 10. Painel e simulador
 - Streamlit local; a tabela `out/itens_simulados.parquet` usa float **apenas para
   exibicao** (entregaveis e calculos permanecem Decimal). O painel mostra a arvore
-  de prova por item, o tribunal das 7 familias e o simulador "e se?" (aliquota,
-  repasse, preco de equilibrio).
+  de prova por item, o tribunal das 7 familias, o simulador "e se?" e a aba
+  **Auditoria LLM**. A narrativa foi ajustada para nao afirmar "ganho/lucro".
 
 ## 11. ICMS de exportacao (pacote oficial novo)
 - O enunciado novo diz que o ICMS nao incide em exportacao e que algumas DANFEs
@@ -93,3 +100,24 @@ Cada uma tem contexto, escolha e justificativa.
   em CFOP 7xxx (`tratamento_exportacao.icms_zero: true`). O template passa a
   divergir intencionalmente; o flag permite reproduzi-lo.
 - Impacto: R$ 43.827,17 a menos nos debitos de hoje e 2027; 2033 nao muda.
+
+## 12. Avaliacao do mapa antes morta, agora ativa
+- Antes, `condicoes.yaml`, `excecoes.yaml` e `regras_operacao.yaml` existiam mas
+  **nao eram lidos** pela cascata (a classificacao usava so `permissao`).
+- Agora `avaliar_mapa` aplica `vigente`, `permissao == PERMITIDO`, `condicao`
+  (predicados de `condicoes.yaml`) e `excecao`/precedencia (`excecoes.yaml`).
+- Condicao **nao mapeada** nao e presumida: marca `ambiguidade_condicao` e vai ao
+  juiz. Efeito no dataset: classes de insumos agropecuarios (200038/515001)
+  eliminadas por regra; ambiguos caem de ~47 para 10.
+
+## 13. CNAE contextual (camada 4)
+- Antes o CNAE so aparecia na justificativa, sem afetar a decisao.
+- Agora a descricao pobre verifica **aderencia ao CNAE esperado** da familia
+  (`familias.yaml`): aderente → `000001` (conf 0,80); divergente → `REVISAR`
+  (conf 0,55); nao verificavel → `000001` (conf 0,75).
+
+## 14. Decomposicao da simulacao e transicao (bonus)
+- O ICMS de exportacao entra como zero na simulacao (decisao #11).
+- `src/transicao.py` calcula 2029–2032 (fracoes de ICMS de `parametros.yaml` +
+  interpolacao linear de CBS/IBS) em artefato **separado**; nao altera os 3
+  cenarios obrigatorios do `simulacao.json`.

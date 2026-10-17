@@ -27,10 +27,10 @@ Evidências após `rodar_tudo.py --reparse` lendo o pacote oficial:
 | Itens | 15.000 | **15.000** |
 | Distribuição 200003/000001/200014/200034/200030/410004/200005/410001 | 4.817/3.889/2.501/1.637/1.228/447/443/38 | **idêntica** |
 | REVISAR | 0 | **0** |
-| Confiança mínima / média | 0,72 / 0,86 | **0,72 / 0,865** |
+| Confiança mínima / média | 0,72 / 0,86 | **0,72 / 0,878** |
 | Imposto Seletivo | 497 | **497** |
 | Líquido hoje / 2027 / 2033 | −1.487.825,47 / −23.645.996,36 / −67.569.596,33 | **−1.531.652,64 / −23.689.823,53 / −67.569.596,33** (ICMS de exportação = zero) |
-| Testes | 26 verdes | **28 verdes** |
+| Testes | 26 verdes | **42 verdes** |
 | Validador oficial | — | **FORMATO OK** |
 
 Além disso, **3 dos 4 itens do template oficial** batem exatamente com a nossa
@@ -67,9 +67,9 @@ lógicos. Nossa leitura aceita **CSV ou XLSX**, então funciona nos dois formato
 | Pitch | 10% | **10%** |
 
 - O automático agora é **70% = 35 + 25 + 10** ("as três primeiras linhas").
-- **Eficiência não é mais critério.** O fato de a solução gastar 0 tokens de LLM
-  deixa de pontuar diretamente; o esforço deve ir para acurácia, simulação e
-  calibração.
+- **Eficiência não é mais critério.** Gastar poucos tokens de LLM deixa de pontuar
+  diretamente; o esforço deve ir para acurácia, simulação e calibração. O evento,
+  porém, **exige** LLM — usamos um juiz cirúrgico só nas exceções (~10 produtos).
 - A mensagem do pitch deve priorizar **acerto por camada, calibração e
   rastreabilidade**, não economia de tokens.
 
@@ -126,7 +126,8 @@ As diferenças visíveis em CSV×XLSX são perda de zeros à esquerda e datas co
 Elas **reforçam** as escolhas que já fazíamos por família/override (por exemplo,
 200014 para hortifruti, 200003 para cesta básica, 200005/200030 para dispositivos
 médicos). Resultado: distribuição de classes inalterada. A confiança média subiu
-de 0,86 para 0,865 porque alguns NCMs passaram a ter desempate explícito.
+de 0,86 para 0,878 porque alguns NCMs passaram a ter desempate explícito e o
+juiz LLM ajustou a confiança das ambiguidades.
 
 ### 2.5 `parametros.json`
 
@@ -167,7 +168,10 @@ nosso CSV grava `000001`, que é o formato aceito pelo validador.
 | `src/simular.py` | Adiciona `variacao_vs_hoje_pct` ao resumo, igual ao template oficial. |
 | `config/parametros.yaml`, `src/premissas.py`, `src/simular.py` | Flag `tratamento_exportacao.icms_zero` (default `true` = zero; `false` = template). |
 | `config/parametros.yaml`, `src/caminhos.py`, `DECISOES.md` | Nota do CNPJ atualizada para o valor oficial `...104`. |
-| `tests/test_simulacao.py` | Golden de exportação para zero, fallback do template e teste do simulador de repasse (28º teste). |
+| `tests/test_simulacao.py` | Golden de exportação para zero, fallback do template e teste do simulador de repasse. |
+| `src/classificar.py` | `avaliar_mapa` passa a aplicar vigência/condição/exceção das tabelas oficiais. |
+| `src/llm_cliente.py`, `src/busca.py`, `src/llm_juiz.py`, `config/llm.yaml` | Juiz LLM das ambiguidades (ponto único de configuração; ver `USO-DO-LLM.md`). |
+| `src/transicao.py`, `scripts/empacotar_entrega.py` | Bônus 2029–2032 e empacotamento automático da entrega. |
 
 ### Como alternar a leitura de exportação
 
@@ -200,11 +204,12 @@ A diferença é R$ 43.827,17 de ICMS destacado nas exportações.
    abaixo disso hoje. Confirmar com a organização se querem itens forçados a
    `REVISAR` mesmo com classificação correta (penaliza acurácia).
 3. **Entrega:** o LEIA-ME novo pede **uma pasta com o nome da equipe contendo
-   exatamente os dois arquivos**. `solucao/saida/` já tem exatamente
-   `itens_classificados.csv` e `simulacao.json`; basta renomear/copiar a pasta
-   para o nome da equipe.
-4. **Pitch:** retirar a ênfase em "0 tokens" como vantagem competitiva (eficiência
-   saiu da rubrica) e reforçar acurácia por camada, calibração e rastreabilidade.
+   exatamente os dois arquivos**. Use `python scripts/empacotar_entrega.py
+   --nome SoldadosDaBorracha`: ele cria a pasta e roda o validador oficial.
+4. **Pitch:** mesmo com a eficiência fora da rubrica, o evento **exige LLM**. O
+   juiz LLM (DeepSeek V4.1 Flash via OpenCode Go) entra só nas exceções (~10
+   chamadas); o pitch deve reforçar acurácia por camada, calibração,
+   rastreabilidade e o uso cirúrgico do modelo.
 
 ---
 
@@ -212,10 +217,10 @@ A diferença é R$ 43.827,17 de ICMS destacado nas exportações.
 
 ```powershell
 cd solucao
-python scripts/rodar_tudo.py --reparse      # le o pacote oficial (XLSX)
+python scripts/rodar_tudo.py --reparse      # le o pacote oficial (XLSX) + juiz LLM
 python scripts/validar_entrega.py           # checklist interno
-python -m pytest -q                         # 28 testes
-python "<pacote>/templates-entrega/validar_entrega.py" ".\saida"  # FORMATO OK
+python -m pytest -q                         # 42 testes
+python scripts/empacotar_entrega.py --nome SoldadosDaBorracha   # FORMATO OK
 ```
 
 ---

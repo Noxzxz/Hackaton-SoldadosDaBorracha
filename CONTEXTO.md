@@ -102,6 +102,11 @@ consumo.
 O automático é **70% = 35 + 25 + 10**. A antiga rubrica de **eficiência (tokens)
 foi removida**; o esforço deve ir para acerto, calibração e rastreabilidade.
 
+O uso de **LLM/agente é obrigatório**. A solução entra com um **juiz LLM
+cirúrgico**, acionado apenas nas exceções (produtos com mais de uma classe
+válida), sempre confinado aos candidatos do mapa e com validação/cache. Neste
+dataset: 10 chamadas para 15.000 itens. Ver `USO-DO-LLM.md`.
+
 ---
 
 ## 6. Formato de entrega

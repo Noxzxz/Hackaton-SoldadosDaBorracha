@@ -46,7 +46,7 @@ resultado foi intencional: ICMS de exportação = zero.
   desempate 0,88; prefixo6 0,85; sem match 0,85; CNAE 0,80; guarda 0,78;
   prefixo4 0,75; override 0,72).
 - Confiança ajustada por estabilidade a mutações de descrição.
-- Resultado atual: **0 `REVISAR`**, mínimo 0,72, média 0,865.
+- Resultado atual: **0 `REVISAR`**, mínimo 0,72, média 0,878.
 - O limiar do enunciado está aplicado; se algum item futuro cair abaixo de 0,70,
   ele vai para `REVISAR`.
 
@@ -56,7 +56,7 @@ resultado foi intencional: ICMS de exportação = zero.
 
 | Verificação | Resultado |
 |---|---|
-| `pytest` | **28 testes verdes** |
+| `pytest` | **42 testes verdes** |
 | Golden tests do enunciado | 6 cenários (inclui R$ 100 → R$ 10,60) |
 | Propriedades (hypothesis) | HALF_UP, sem incidência, idempotência, crédito null |
 | Gate de reconciliação | **1.387/1.387** notas |
@@ -72,6 +72,11 @@ Testes novos relevantes:
   desligado.
 - `test_simulador_e_se_repasse` — o repasse muda preço/débito quando a alíquota
   difere de 26,5%.
+- `test_mapa.py` — `avaliar_mapa`: condição elimina classe, VEDADO não entra,
+  NCM fora do mapa, configs carregadas.
+- `test_busca.py` — BM25 determinístico, filtro por classe, sem match.
+- `test_llm_juiz.py` (cliente falso) — classe fora dos candidatos rejeitada,
+  `REVISAR`, dry-run sem modelo e cache evita segunda chamada.
 
 ---
 
@@ -81,16 +86,19 @@ Testes novos relevantes:
    zero por decisão de negócio. Se a banca usar o template, **256 itens** divergem
    em hoje/2027 (dos 447 exportados; 191 já tinham ICMS zero).
 2. **`REVISAR`:** nenhum item cai abaixo de 0,70 hoje; se a organização exigir
-   revisão forçada, o limiar pode ser elevado.
+   revisão forçada, o limiar pode ser elevado (ou `comportamento_sem_llm: revisar`).
 3. **Dados sintéticos:** os valores simulam o case e não uma empresa real.
 4. **Acurácia oficial:** só a organização mede contra o gabarito; não acessamos
    `04-gabarito-organizacao`.
+5. **LLM:** a decisão do juiz é confinada aos candidatos e cacheada; sem o modelo
+   configurado o pipeline é 100% determinístico.
 
 ---
 
 ## 6. Conclusão
 
-A solução está determinística, testada e auditável. As falhas silenciosas foram
-substituídas por logs e testes; o estado global mutável foi removido; o painel
-ficou legível; e o erro de ICMS de exportação foi identificado, quantificado e
-corrigido.
+A solução é determinística por padrão, com um **juiz LLM cirúrgico** para as
+exceções, e está testada e auditável. As falhas silenciosas foram substituídas por
+logs e testes; o estado global mutável foi removido; as condições/exceções do mapa
+passaram a ser avaliadas de fato; o painel ficou legível; e o erro de ICMS de
+exportação foi identificado, quantificado e corrigido.

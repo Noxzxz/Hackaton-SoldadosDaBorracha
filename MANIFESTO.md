@@ -25,8 +25,9 @@ execução ou restrito ficou de fora.
 `solucao/` — código e artefatos necessários:
 
 - `src/`, `scripts/`, `app/`, `config/`, `tests/`
-- `out/` (cache de extração, base do painel, trilha, tribunal, equilíbrio e
-  baselines)
+- `config/llm.yaml` — ponto único de configuração do modelo (juiz LLM)
+- `out/` (cache de extração, base do painel, trilha, tribunal, equilíbrio,
+  transição, auditoria do juiz LLM e baselines)
 - `saida/` (os dois entregáveis oficiais)
 - `requirements.txt`, `.gitignore`
 
@@ -37,6 +38,10 @@ execução ou restrito ficou de fora.
 - `SOLUCAO.md` — arquitetura, módulos e decisões.
 - `RESULTADOS.md` — números, baselines e validação.
 - `COMO-RODAR.md` — setup, pipeline, painel, validação e entrega.
+- `USO-DO-LLM.md` — funcionamento do juiz LLM ponta a ponta.
+- `PLANO-IMPLEMENTACAO-LLM.md` — plano da implementação com LLM obrigatório.
+- `TRATAMENTO-E-DEDUPLICACAO.md` — tratamento de dados e deduplicação.
+- `RESOLUCAO-ENTREGAVEIS.md` — leitura dos arquivos de saída.
 - `QUALIDADE-E-CORRECOES.md` — auditoria multi-agente e correções.
 - `MANIFESTO.md` — este arquivo.
 
@@ -91,13 +96,13 @@ Nenhum arquivo foi apagado da pasta original; esta é uma cópia limpa.
 cd solucao
 python scripts/validar_entrega.py
 python -m pytest -q
-python ..\pacote-times\templates-entrega\validar_entrega.py .\saida
+python scripts/empacotar_entrega.py --nome SoldadosDaBorracha
 ```
 
 Esperado:
 
 - `TUDO OK`
-- `28 passed`
+- `42 passed`
 - `FORMATO OK`
 
 ---
